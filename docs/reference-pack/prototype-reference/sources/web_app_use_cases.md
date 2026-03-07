@@ -4,7 +4,7 @@ Here’s a compiled list of all the **use cases** in a structured format:
 
 ---
 
-### **Kumpel Use Cases**
+### **Dictator Use Cases**
 
 1. **Story Creation**
    - **As a**: User

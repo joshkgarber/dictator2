@@ -47,8 +47,6 @@ These capture how the old web app was planned and scoped.
 
 - `prototype-reference/sources/web_app_use_cases.md`
 - `prototype-reference/sources/main.py`
-- `prototype-reference/sources/PLAN.md`
-- `prototype-reference/sources/TODO.md`
 
 These are especially important for understanding the original session behavior that the earlier web app implementation was trying to preserve.
 
