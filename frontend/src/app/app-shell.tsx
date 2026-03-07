@@ -3,6 +3,7 @@ import { CalendarDays, Clock3, History, NotebookTabs } from "lucide-react";
 
 import { ApiStatusBadge } from "@/components/shared/api-status-badge";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/features/auth/auth-context";
 import { SessionDialog } from "@/features/session/session-dialog";
 import { SessionOverDialog } from "@/features/session/session-over-dialog";
 import { HistoryView } from "@/features/history/history-view";
@@ -28,6 +29,7 @@ const tabs: ShellTab[] = [
 ];
 
 export function AppShell() {
+  const { user, logout, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<AppTab>("schedule");
   const [sessionCandidate, setSessionCandidate] = useState<NextSessionCandidate | null>(null);
   const [isSessionOverOpen, setIsSessionOverOpen] = useState(false);
@@ -62,12 +64,21 @@ export function AppShell() {
               <p className="mt-2 text-sm text-slate-700">{shellHeadline}</p>
             </div>
 
-            <div className="flex items-center gap-2 self-start rounded-full border border-slate-300 bg-slate-50 px-3 py-2">
-              <Clock3 className="h-4 w-4 text-slate-600" />
-              <ApiStatusBadge status={healthRequest.status} errorMessage={healthRequest.error?.message} />
-              <Button size="sm" variant="outline" onClick={() => void healthRequest.run()}>
-                Refresh
-              </Button>
+            <div className="flex flex-col gap-2 self-start md:items-end">
+              <div className="flex items-center gap-2 rounded-full border border-slate-300 bg-slate-50 px-3 py-2">
+                <Clock3 className="h-4 w-4 text-slate-600" />
+                <ApiStatusBadge status={healthRequest.status} errorMessage={healthRequest.error?.message} />
+                <Button size="sm" variant="outline" onClick={() => void healthRequest.run()}>
+                  Refresh
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700">
+                <span className="font-medium">Signed in as {user?.username || user?.email || "user"}</span>
+                <Button size="sm" variant="ghost" onClick={() => void logout()} disabled={isLoading}>
+                  {isLoading ? "Signing out..." : "Sign out"}
+                </Button>
+              </div>
             </div>
           </div>
 
