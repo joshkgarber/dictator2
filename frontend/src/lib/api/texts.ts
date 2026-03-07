@@ -12,6 +12,13 @@ export type TextRecord = {
   lineCount: number;
   clipCount: number;
   isReady: boolean;
+  schedule: {
+    id: number;
+    nextSessionDate: string;
+    notes: string | null;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
 };

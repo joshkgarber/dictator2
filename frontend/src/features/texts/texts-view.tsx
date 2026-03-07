@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDownUp, CalendarDays, LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { DataTable, type TableColumn } from "@/components/shared/data-table";
 import { FormField, FormSection } from "@/components/shared/form-primitives";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { ApiError } from "@/lib/api/client";
+import { upsertTextSchedule } from "@/lib/api/schedule";
 import {
   createText,
   deleteText,
@@ -28,6 +29,7 @@ type SortDirection = "asc" | "desc";
 type TextFormSubmitPayload = {
   name: string;
   level: TextLevel;
+  scheduledDate: string;
   transcriptRaw: string | null;
   clips: File[];
 };
@@ -60,6 +62,13 @@ function parseTranscriptLines(transcriptRaw: string): string[] {
     .split("\n")
     .map((line: string) => line.trim())
     .filter(Boolean);
+}
+
+function toIsoDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function inspectClipFiles(files: File[]): ClipInspection {
@@ -355,6 +364,8 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
           transcriptRaw: payload.transcriptRaw,
         });
 
+        await upsertTextSchedule(created.id, payload.scheduledDate);
+
         let nextText = created;
         if (payload.clips.length > 0) {
           await uploadTextClips(created.id, payload.clips);
@@ -388,6 +399,8 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
           await uploadTextClips(selectedText.id, payload.clips);
           changed = true;
         }
+
+        await upsertTextSchedule(selectedText.id, payload.scheduledDate);
 
         if (changed) {
           const readiness = await validateTextReadiness(selectedText.id);
@@ -562,7 +575,9 @@ function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: T
   const [transcriptRaw, setTranscriptRaw] = useState<string | null>(null);
   const [transcriptLineCount, setTranscriptLineCount] = useState<number | null>(null);
   const [clips, setClips] = useState<File[]>([]);
+  const [scheduledDate, setScheduledDate] = useState(text?.schedule?.nextSessionDate || "");
   const [localError, setLocalError] = useState<string | null>(null);
+  const todayIso = useMemo(() => toIsoDate(new Date()), []);
 
   useEffect(() => {
     if (!open) {
@@ -575,6 +590,7 @@ function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: T
     setTranscriptRaw(null);
     setTranscriptLineCount(null);
     setClips([]);
+    setScheduledDate(text?.schedule?.nextSessionDate || "");
     setLocalError(null);
   }, [open, text]);
 
@@ -600,6 +616,16 @@ function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: T
     const trimmedName = name.trim();
     if (!trimmedName) {
       setLocalError("Name is required");
+      return;
+    }
+
+    if (!scheduledDate) {
+      setLocalError("Scheduled date is required");
+      return;
+    }
+
+    if (scheduledDate < todayIso) {
+      setLocalError("Scheduled date cannot be in the past");
       return;
     }
 
@@ -647,6 +673,7 @@ function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: T
     onSubmit({
       name: trimmedName,
       level,
+      scheduledDate,
       transcriptRaw,
       clips,
     });
@@ -674,7 +701,7 @@ function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: T
         </>
       }
     >
-      <form id="text-form" className="space-y-3" onSubmit={submitForm}>
+      <form id="text-form" className="space-y-3" onSubmit={submitForm} noValidate>
         {localError && <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{localError}</p>}
 
         <FormSection title="Metadata" description="Set core text identity before validating transcript and clips.">
@@ -702,6 +729,21 @@ function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: T
                 </option>
               ))}
             </select>
+          </FormField>
+
+          <FormField label="Scheduled Date" htmlFor="text-scheduled-date" hint="Required. Used to place the text in the session schedule.">
+            <div className="relative">
+              <input
+                id="text-scheduled-date"
+                type="date"
+                value={scheduledDate}
+                min={todayIso}
+                onChange={(event) => setScheduledDate(event.target.value)}
+                className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
+                required
+              />
+              <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-5 w-5 text-slate-500" />
+            </div>
           </FormField>
         </FormSection>
 
