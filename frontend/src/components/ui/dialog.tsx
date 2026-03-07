@@ -12,6 +12,7 @@ type DialogProps = {
   children: ReactNode;
   footer?: ReactNode;
   size?: "sm" | "md" | "lg";
+  dismissible?: boolean;
 };
 
 const sizeClassName: Record<NonNullable<DialogProps["size"]>, string> = {
@@ -20,14 +21,23 @@ const sizeClassName: Record<NonNullable<DialogProps["size"]>, string> = {
   lg: "max-w-4xl",
 };
 
-export function Dialog({ open, onOpenChange, title, description, children, footer, size = "md" }: DialogProps) {
+export function Dialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  footer,
+  size = "md",
+  dismissible = true,
+}: DialogProps) {
   useEffect(() => {
     if (!open) {
       return;
     }
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (dismissible && event.key === "Escape") {
         onOpenChange(false);
       }
     };
@@ -37,7 +47,7 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
     return () => {
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [open, onOpenChange]);
+  }, [dismissible, open, onOpenChange]);
 
   if (!open) {
     return null;
@@ -45,12 +55,16 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
-        aria-label="Close dialog"
-        className="absolute inset-0 cursor-default bg-slate-950/45"
-        onClick={() => onOpenChange(false)}
-      />
+      {dismissible ? (
+        <button
+          type="button"
+          aria-label="Close dialog"
+          className="absolute inset-0 cursor-default bg-slate-950/45"
+          onClick={() => onOpenChange(false)}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-slate-950/45" />
+      )}
 
       <section
         role="dialog"
@@ -66,13 +80,15 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
             <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
             {description && <p className="mt-1 text-sm text-slate-700">{description}</p>}
           </div>
-          <button
-            type="button"
-            className="rounded-md border border-slate-300 bg-white p-1 text-slate-600 transition hover:bg-slate-100"
-            onClick={() => onOpenChange(false)}
-          >
-            <X className="h-4 w-4" />
-          </button>
+          {dismissible && (
+            <button
+              type="button"
+              className="rounded-md border border-slate-300 bg-white p-1 text-slate-600 transition hover:bg-slate-100"
+              onClick={() => onOpenChange(false)}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </header>
 
         <div className="max-h-[70vh] overflow-y-auto px-5 py-4">{children}</div>

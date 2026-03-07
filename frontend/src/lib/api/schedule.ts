@@ -29,8 +29,23 @@ type ListScheduleResponse = {
   schedule: ScheduleEntry[];
 };
 
+type ScheduleResponse = {
+  schedule: ScheduleEntry;
+};
+
 export async function fetchSchedule(): Promise<ListScheduleResponse> {
   return requestJson<ListScheduleResponse>("/api/schedule", {
     method: "GET",
   });
+}
+
+export async function upsertTextSchedule(textId: number, nextSessionDate: string, notes?: string): Promise<ScheduleEntry> {
+  const response = await requestJson<ScheduleResponse>(`/api/texts/${textId}/schedule`, {
+    method: "PUT",
+    body: JSON.stringify({
+      nextSessionDate,
+      notes,
+    }),
+  });
+  return response.schedule;
 }

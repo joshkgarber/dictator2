@@ -1,8 +1,11 @@
-import { CalendarDays } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, LoaderCircle } from "lucide-react";
 
 import { FormField } from "@/components/shared/form-primitives";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import { ApiError } from "@/lib/api/client";
+import { upsertTextSchedule } from "@/lib/api/schedule";
 import type { SessionState } from "@/lib/api/sessions";
 
 type SessionOverDialogProps = {
@@ -22,26 +25,84 @@ function formatDuration(seconds: number | null): string {
   return `${minutes}m ${remainder}s`;
 }
 
+function toIsoDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof ApiError && typeof error.payload === "object" && error.payload !== null) {
+    const payload = error.payload as { error?: { message?: string } };
+    const apiMessage = payload.error?.message;
+    if (apiMessage) {
+      return apiMessage;
+    }
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Failed to save next session date.";
+}
+
 export function SessionOverDialog({ open, session, onOpenChange, onDone }: SessionOverDialogProps) {
+  const [nextSessionDate, setNextSessionDate] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const todayIso = useMemo(() => toIsoDate(new Date()), []);
+
+  useEffect(() => {
+    if (!open) {
+      setNextSessionDate("");
+      setErrorMessage(null);
+      setIsSaving(false);
+    }
+  }, [open]);
+
   const weightedScore = session?.weightedScore ?? session?.rawScore ?? 0;
+
+  async function saveNextDate() {
+    if (!session) {
+      return;
+    }
+    if (!nextSessionDate) {
+      setErrorMessage("Choose a next session date to continue.");
+      return;
+    }
+
+    setIsSaving(true);
+    setErrorMessage(null);
+    try {
+      await upsertTextSchedule(session.textId, nextSessionDate);
+      onDone();
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+      setIsSaving(false);
+    }
+  }
 
   return (
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
       title="Session Over"
-      description="Foundation for post-session summary and required rescheduling."
+      description="Review your result and set the next scheduled date before returning to Schedule."
       size="sm"
+      dismissible={false}
       footer={
         <>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+          <Button onClick={() => void saveNextDate()} disabled={isSaving || !session}>
+            {isSaving && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+            Save Next Date
           </Button>
-          <Button onClick={onDone}>Save Next Date</Button>
         </>
       }
     >
       <div className="space-y-3">
+        {errorMessage && <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{errorMessage}</p>}
+
         <div className="rounded-md border border-slate-300 bg-slate-50 p-3 text-sm text-slate-700">
           <p>
             Weighted score: <span className="font-semibold text-slate-900">{weightedScore.toFixed(2)}</span>
@@ -51,9 +112,23 @@ export function SessionOverDialog({ open, session, onOpenChange, onDone }: Sessi
           </p>
         </div>
 
-        <FormField label="Next session date" htmlFor="next-session-date" hint="Scheduling in this step is required by the phase-6 UX.">
+        <FormField label="Next session date" htmlFor="next-session-date" hint="Required to complete the post-session flow.">
           <div className="relative">
-            <input id="next-session-date" type="date" className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm" />
+            <input
+              id="next-session-date"
+              type="date"
+              value={nextSessionDate}
+              min={todayIso}
+              onChange={(event) => {
+                setNextSessionDate(event.target.value);
+                if (errorMessage) {
+                  setErrorMessage(null);
+                }
+              }}
+              className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
+              disabled={isSaving}
+              required
+            />
             <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-5 w-5 text-slate-500" />
           </div>
         </FormField>
