@@ -8,6 +8,7 @@ import { SessionOverDialog } from "@/features/session/session-over-dialog";
 import { HistoryView } from "@/features/history/history-view";
 import { ScheduleView, type NextSessionCandidate } from "@/features/schedule/schedule-view";
 import { TextsView } from "@/features/texts/texts-view";
+import type { SessionState } from "@/lib/api/sessions";
 import { fetchHealth } from "@/lib/api/client";
 import { useApiRequest } from "@/lib/api/use-api-request";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ export function AppShell() {
   const [activeTab, setActiveTab] = useState<AppTab>("schedule");
   const [sessionCandidate, setSessionCandidate] = useState<NextSessionCandidate | null>(null);
   const [isSessionOverOpen, setIsSessionOverOpen] = useState(false);
+  const [lastCompletedSession, setLastCompletedSession] = useState<SessionState | null>(null);
 
   const healthRequest = useApiRequest(fetchHealth);
 
@@ -113,8 +115,9 @@ export function AppShell() {
             setSessionCandidate(null);
           }
         }}
-        onSessionOver={() => {
+        onSessionOver={(session) => {
           setSessionCandidate(null);
+          setLastCompletedSession(session);
           setIsSessionOverOpen(true);
           setActiveTab("schedule");
         }}
@@ -122,9 +125,11 @@ export function AppShell() {
 
       <SessionOverDialog
         open={isSessionOverOpen}
+        session={lastCompletedSession}
         onOpenChange={setIsSessionOverOpen}
         onDone={() => {
           setIsSessionOverOpen(false);
+          setLastCompletedSession(null);
           setActiveTab("schedule");
         }}
       />
