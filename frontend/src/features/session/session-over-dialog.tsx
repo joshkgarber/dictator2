@@ -3,14 +3,28 @@ import { CalendarDays } from "lucide-react";
 import { FormField } from "@/components/shared/form-primitives";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import type { SessionState } from "@/lib/api/sessions";
 
 type SessionOverDialogProps = {
   open: boolean;
+  session: SessionState | null;
   onOpenChange: (open: boolean) => void;
   onDone: () => void;
 };
 
-export function SessionOverDialog({ open, onOpenChange, onDone }: SessionOverDialogProps) {
+function formatDuration(seconds: number | null): string {
+  if (!seconds || seconds <= 0) {
+    return "0m 0s";
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const remainder = seconds % 60;
+  return `${minutes}m ${remainder}s`;
+}
+
+export function SessionOverDialog({ open, session, onOpenChange, onDone }: SessionOverDialogProps) {
+  const weightedScore = session?.weightedScore ?? session?.rawScore ?? 0;
+
   return (
     <Dialog
       open={open}
@@ -30,10 +44,10 @@ export function SessionOverDialog({ open, onOpenChange, onDone }: SessionOverDia
       <div className="space-y-3">
         <div className="rounded-md border border-slate-300 bg-slate-50 p-3 text-sm text-slate-700">
           <p>
-            Weighted score: <span className="font-semibold text-slate-900">88%</span>
+            Weighted score: <span className="font-semibold text-slate-900">{weightedScore.toFixed(2)}</span>
           </p>
           <p>
-            Duration: <span className="font-semibold text-slate-900">12m 34s</span>
+            Duration: <span className="font-semibold text-slate-900">{formatDuration(session?.durationSeconds ?? null)}</span>
           </p>
         </div>
 
