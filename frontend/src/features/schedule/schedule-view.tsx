@@ -1,31 +1,240 @@
-import { CalendarCheck2, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarCheck2, ChevronLeft, ChevronRight, LoaderCircle, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { fetchSchedule, type ScheduleEntry } from "@/lib/api/schedule";
 import { cn } from "@/lib/utils";
 
 export type NextSessionCandidate = {
+  textId: number;
   textName: string;
   level: string;
   dueLabel: string;
 };
 
-type ScheduleRow = NextSessionCandidate & {
+type DueBucket = "Overdue" | "Due Today" | "Upcoming";
+
+type ScheduleRow = {
+  id: number;
+  textId: number;
+  textName: string;
+  level: string;
+  dueDate: string;
+  dueLabel: string;
+  isReady: boolean;
   bucket: "Overdue" | "Due Today" | "Upcoming";
 };
 
-const scheduleRows: ScheduleRow[] = [
-  { textName: "Transit Announcements", level: "B1", dueLabel: "2 days overdue", bucket: "Overdue" },
-  { textName: "Food Market Dialogue", level: "A2", dueLabel: "Today 5:30 PM", bucket: "Due Today" },
-  { textName: "Legal Press Briefing", level: "C1", dueLabel: "Tue, Mar 10", bucket: "Upcoming" },
-  { textName: "Hospital Intake Script", level: "B2", dueLabel: "Fri, Mar 13", bucket: "Upcoming" },
-];
+type CalendarDay = {
+  key: string;
+  dateIso: string;
+  dayLabel: string;
+  dayOfMonth: string;
+  isToday: boolean;
+  sessions: ScheduleRow[];
+};
+
+const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const BUCKET_ORDER: Record<DueBucket, number> = {
+  Overdue: 0,
+  "Due Today": 1,
+  Upcoming: 2,
+};
+
+function toIsoDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseIsoDate(value: string): Date {
+  const parsed = new Date(`${value}T12:00:00`);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
+function getWeekStart(date: Date): Date {
+  const clone = new Date(date);
+  const day = clone.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  clone.setDate(clone.getDate() + diff);
+  clone.setHours(12, 0, 0, 0);
+  return clone;
+}
+
+function shiftDays(date: Date, days: number): Date {
+  const clone = new Date(date);
+  clone.setDate(clone.getDate() + days);
+  return clone;
+}
+
+function formatDueLabel(dateIso: string, todayIso: string): string {
+  if (dateIso === todayIso) {
+    return "Today";
+  }
+
+  const parsed = parseIsoDate(dateIso);
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(parsed);
+}
+
+function getDueBucket(dateIso: string, todayIso: string): DueBucket {
+  if (dateIso < todayIso) {
+    return "Overdue";
+  }
+  if (dateIso === todayIso) {
+    return "Due Today";
+  }
+  return "Upcoming";
+}
+
+function toScheduleRows(rows: ScheduleEntry[], todayIso: string): ScheduleRow[] {
+  return rows.map((row) => ({
+    id: row.id,
+    textId: row.textId,
+    textName: row.text.name,
+    level: row.text.level,
+    dueDate: row.nextSessionDate,
+    dueLabel: formatDueLabel(row.nextSessionDate, todayIso),
+    isReady: row.text.isReady,
+    bucket: getDueBucket(row.nextSessionDate, todayIso),
+  }));
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Failed to load schedule";
+}
 
 type ScheduleViewProps = {
   onStartNextSession: (candidate: NextSessionCandidate) => void;
 };
 
 export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
-  const candidate = scheduleRows[0];
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [rows, setRows] = useState<ScheduleRow[]>([]);
+  const [todayIso, setTodayIso] = useState(() => toIsoDate(new Date()));
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSchedule() {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const response = await fetchSchedule();
+        if (!active) {
+          return;
+        }
+        const resolvedToday = response.today || toIsoDate(new Date());
+        setTodayIso(resolvedToday);
+        setRows(toScheduleRows(response.schedule, resolvedToday));
+        setWeekStart(getWeekStart(parseIsoDate(resolvedToday)));
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+        setErrorMessage(getErrorMessage(error));
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadSchedule();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const groupedRows = useMemo(() => {
+    const grouped: Record<DueBucket, ScheduleRow[]> = {
+      Overdue: [],
+      "Due Today": [],
+      Upcoming: [],
+    };
+
+    for (const row of rows) {
+      grouped[row.bucket].push(row);
+    }
+
+    return grouped;
+  }, [rows]);
+
+  const nextCandidate = useMemo<NextSessionCandidate | null>(() => {
+    const readyRows = rows.filter((row) => row.isReady);
+    if (readyRows.length === 0) {
+      return null;
+    }
+
+    const sorted = [...readyRows].sort((a, b) => {
+      const bucketDiff = BUCKET_ORDER[a.bucket] - BUCKET_ORDER[b.bucket];
+      if (bucketDiff !== 0) {
+        return bucketDiff;
+      }
+      if (a.dueDate !== b.dueDate) {
+        return a.dueDate.localeCompare(b.dueDate);
+      }
+      return a.textName.localeCompare(b.textName);
+    });
+
+    const candidate = sorted[0];
+    return {
+      textId: candidate.textId,
+      textName: candidate.textName,
+      level: candidate.level,
+      dueLabel: candidate.dueLabel,
+    };
+  }, [rows]);
+
+  const weekDays = useMemo<CalendarDay[]>(() => {
+    const entriesByDate = new Map<string, ScheduleRow[]>();
+    for (const row of rows) {
+      const existing = entriesByDate.get(row.dueDate);
+      if (existing) {
+        existing.push(row);
+      } else {
+        entriesByDate.set(row.dueDate, [row]);
+      }
+    }
+
+    return Array.from({ length: 7 }, (_, index) => {
+      const dayDate = shiftDays(weekStart, index);
+      const dateIso = toIsoDate(dayDate);
+      const sessions = entriesByDate.get(dateIso) || [];
+
+      return {
+        key: `${dateIso}-${index}`,
+        dateIso,
+        dayLabel: WEEKDAY_LABELS[dayDate.getDay()],
+        dayOfMonth: String(dayDate.getDate()),
+        isToday: dateIso === todayIso,
+        sessions,
+      };
+    });
+  }, [rows, todayIso, weekStart]);
+
+  const weekLabel = useMemo(
+    () =>
+      new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+      }).format(weekStart),
+    [weekStart],
+  );
+
+  const hasRows = rows.length > 0;
 
   return (
     <section className="space-y-4">
@@ -36,8 +245,12 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
         </div>
 
         <Button
+          disabled={!nextCandidate || isLoading}
           onClick={() => {
-            onStartNextSession(candidate);
+            if (!nextCandidate) {
+              return;
+            }
+            onStartNextSession(nextCandidate);
           }}
         >
           <Play className="mr-2 h-4 w-4" />
@@ -45,65 +258,127 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
         </Button>
       </header>
 
+      {errorMessage && <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{errorMessage}</p>}
+
       <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
         <article className="rounded-xl border border-slate-300 bg-white">
           <header className="border-b border-slate-200 px-4 py-3">
             <h3 className="font-semibold text-slate-800">Due Queue</h3>
           </header>
 
-          <ul className="divide-y divide-slate-200">
-            {scheduleRows.map((row) => (
-              <li key={row.textName} className="flex items-center justify-between gap-4 px-4 py-3">
-                <div>
-                  <p className="font-medium text-slate-900">{row.textName}</p>
-                  <p className="text-sm text-slate-600">Level {row.level}</p>
-                </div>
+          {isLoading ? (
+            <div className="flex items-center gap-2 px-4 py-5 text-sm text-slate-600">
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+              Loading schedule...
+            </div>
+          ) : !hasRows ? (
+            <p className="px-4 py-5 text-sm text-slate-600">No scheduled sessions yet. Add schedule dates to texts to populate this workspace.</p>
+          ) : (
+            <div className="space-y-3 px-3 py-3">
+              {(["Overdue", "Due Today", "Upcoming"] as DueBucket[]).map((bucket) => (
+                <section key={bucket} className="rounded-lg border border-slate-200 bg-slate-50/60">
+                  <header className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
+                    <p className="text-sm font-semibold text-slate-800">{bucket}</p>
+                    <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-slate-600">{groupedRows[bucket].length}</span>
+                  </header>
 
-                <div className="text-right">
-                  <span
-                    className={cn(
-                      "inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold",
-                      row.bucket === "Overdue" && "border-rose-200 bg-rose-50 text-rose-700",
-                      row.bucket === "Due Today" && "border-amber-200 bg-amber-50 text-amber-700",
-                      row.bucket === "Upcoming" && "border-slate-300 bg-slate-100 text-slate-700",
-                    )}
-                  >
-                    {row.bucket}
-                  </span>
-                  <p className="mt-1 text-xs text-slate-500">{row.dueLabel}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+                  {groupedRows[bucket].length === 0 ? (
+                    <p className="px-3 py-2 text-xs text-slate-500">No items</p>
+                  ) : (
+                    <ul className="divide-y divide-slate-200/80">
+                      {groupedRows[bucket].map((row) => (
+                        <li key={`${bucket}-${row.id}`} className="flex items-center justify-between gap-3 px-3 py-2.5">
+                          <div>
+                            <p className="font-medium text-slate-900">{row.textName}</p>
+                            <p className="text-xs text-slate-600">Level {row.level}</p>
+                            <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500">
+                              <CalendarCheck2 className="h-3.5 w-3.5" />
+                              Session scheduled
+                            </p>
+                          </div>
+
+                          <div className="text-right">
+                            <span
+                              className={cn(
+                                "inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold",
+                                row.bucket === "Overdue" && "border-rose-200 bg-rose-50 text-rose-700",
+                                row.bucket === "Due Today" && "border-amber-200 bg-amber-50 text-amber-700",
+                                row.bucket === "Upcoming" && "border-slate-300 bg-slate-100 text-slate-700",
+                              )}
+                            >
+                              {row.bucket}
+                            </span>
+                            <p className="mt-1 text-xs text-slate-500">{row.dueLabel}</p>
+                            {!row.isReady && <p className="text-[11px] text-rose-600">Text not ready</p>}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))}
+            </div>
+          )}
         </article>
 
         <article className="rounded-xl border border-slate-300 bg-white">
           <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-            <h3 className="font-semibold text-slate-800">Week of Mar 9</h3>
+            <h3 className="font-semibold text-slate-800">Week of {weekLabel}</h3>
             <div className="flex items-center gap-1">
-              <button type="button" className="rounded-md border border-slate-300 p-1.5 text-slate-700 hover:bg-slate-100">
+              <button
+                type="button"
+                className="rounded-md border border-slate-300 p-1.5 text-slate-700 hover:bg-slate-100"
+                onClick={() => setWeekStart((prev) => shiftDays(prev, -7))}
+              >
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <button type="button" className="rounded-md border border-slate-300 p-1.5 text-slate-700 hover:bg-slate-100">
+              <button
+                type="button"
+                className="rounded-md border border-slate-300 p-1.5 text-slate-700 hover:bg-slate-100"
+                onClick={() => setWeekStart((prev) => shiftDays(prev, 7))}
+              >
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           </header>
 
           <div className="grid grid-cols-7 gap-2 px-3 py-4 text-center">
-            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, index) => (
-              <div key={day} className="space-y-1 rounded-lg border border-slate-200 bg-slate-50 p-2">
-                <p className="text-xs font-semibold uppercase text-slate-500">{day}</p>
-                <p className="text-sm font-medium text-slate-800">{index + 9}</p>
-                {[1, 4].includes(index) && (
+            {weekDays.map((day) => (
+              <div
+                key={day.key}
+                className={cn(
+                  "space-y-1 rounded-lg border p-2",
+                  day.isToday ? "border-slate-900 bg-slate-100" : "border-slate-200 bg-slate-50",
+                )}
+              >
+                <p className="text-xs font-semibold uppercase text-slate-500">{day.dayLabel}</p>
+                <p className="text-sm font-medium text-slate-800">{day.dayOfMonth}</p>
+                {day.sessions.length > 0 && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">
                     <CalendarCheck2 className="h-3 w-3" />
-                    Session
+                    {day.sessions.length === 1 ? "1 Session" : `${day.sessions.length} Sessions`}
                   </span>
                 )}
+                {day.sessions.length === 0 && <p className="text-[10px] text-slate-400">-</p>}
               </div>
             ))}
           </div>
+
+          {!isLoading && !hasRows && (
+            <p className="border-t border-slate-200 px-4 py-3 text-sm text-slate-500">Calendar indicators appear once schedule dates are assigned.</p>
+          )}
+
+          {!isLoading && hasRows && (
+            <div className="border-t border-slate-200 px-4 py-3 text-xs text-slate-600">
+              {nextCandidate ? (
+                <p>
+                  Next launch target: <span className="font-semibold text-slate-900">{nextCandidate.textName}</span> ({nextCandidate.dueLabel})
+                </p>
+              ) : (
+                <p>All scheduled items are blocked because their texts are not ready yet.</p>
+              )}
+            </div>
+          )}
         </article>
       </div>
     </section>
