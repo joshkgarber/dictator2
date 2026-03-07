@@ -41,7 +41,7 @@ export function AppShell() {
 
   useEffect(() => {
     void healthRequest.run();
-  }, [healthRequest]);
+  }, []);
 
   const shellHeadline = useMemo(() => {
     if (activeTab === "schedule") {
