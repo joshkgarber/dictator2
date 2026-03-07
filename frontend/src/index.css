@@ -1,24 +1,26 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222.2 47.4% 11.2%;
+  --background: 210 20% 98%;
+  --foreground: 220 42% 12%;
   --card: 0 0% 100%;
-  --card-foreground: 222.2 47.4% 11.2%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
-  --radius: 0.5rem;
+  --card-foreground: 220 42% 12%;
+  --primary: 220 35% 14%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 215 28% 94%;
+  --secondary-foreground: 220 35% 14%;
+  --muted: 215 30% 95%;
+  --muted-foreground: 217 15% 40%;
+  --accent: 36 88% 93%;
+  --accent-foreground: 24 55% 20%;
+  --border: 214 22% 82%;
+  --input: 214 22% 82%;
+  --ring: 220 35% 14%;
+  --radius: 0.75rem;
 }
 
 * {
@@ -31,9 +33,15 @@ body {
   font-family: "IBM Plex Sans", ui-sans-serif, sans-serif;
 }
 
-.bg-app-gradient {
+.bg-app-canvas {
   background:
-    radial-gradient(circle at top right, rgb(165 180 252 / 0.2), transparent 40%),
-    radial-gradient(circle at bottom left, rgb(125 211 252 / 0.2), transparent 45%),
-    linear-gradient(180deg, rgb(241 245 249) 0%, rgb(226 232 240) 100%);
+    radial-gradient(circle at 12% 15%, rgb(219 234 254 / 0.3), transparent 34%),
+    radial-gradient(circle at 92% 8%, rgb(254 243 199 / 0.5), transparent 28%),
+    linear-gradient(180deg, rgb(248 250 252) 0%, rgb(235 240 246) 100%);
+}
+
+h1,
+h2,
+h3 {
+  font-family: "IBM Plex Serif", ui-serif, serif;
 }
