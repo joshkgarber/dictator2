@@ -32,6 +32,7 @@ export function AppShell() {
   const [sessionCandidate, setSessionCandidate] = useState<NextSessionCandidate | null>(null);
   const [isSessionOverOpen, setIsSessionOverOpen] = useState(false);
   const [lastCompletedSession, setLastCompletedSession] = useState<SessionState | null>(null);
+  const [scheduleRefreshToken, setScheduleRefreshToken] = useState(0);
 
   const healthRequest = useApiRequest(fetchHealth);
 
@@ -96,6 +97,7 @@ export function AppShell() {
           <section className="mt-6 rounded-xl border border-slate-300 bg-white p-3 md:p-5">
             {activeTab === "schedule" && (
               <ScheduleView
+                key={scheduleRefreshToken}
                 onStartNextSession={(candidate) => {
                   setSessionCandidate(candidate);
                 }}
@@ -119,7 +121,6 @@ export function AppShell() {
           setSessionCandidate(null);
           setLastCompletedSession(session);
           setIsSessionOverOpen(true);
-          setActiveTab("schedule");
         }}
       />
 
@@ -130,6 +131,7 @@ export function AppShell() {
         onDone={() => {
           setIsSessionOverOpen(false);
           setLastCompletedSession(null);
+          setScheduleRefreshToken((value) => value + 1);
           setActiveTab("schedule");
         }}
       />
