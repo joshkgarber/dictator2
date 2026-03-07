@@ -1,5 +1,8 @@
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
+let csrfTokenResolver: (() => string | null) | null = null;
+let unauthorizedHandler: (() => void) | null = null;
+
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") {
     return null;
@@ -47,6 +50,25 @@ export class ApiError extends Error {
   }
 }
 
+export function setApiCsrfTokenResolver(resolver: (() => string | null) | null) {
+  csrfTokenResolver = resolver;
+}
+
+export function setApiUnauthorizedHandler(handler: (() => void) | null) {
+  unauthorizedHandler = handler;
+}
+
+function getErrorMessage(payload: unknown, status: number): string {
+  if (payload && typeof payload === "object" && "error" in payload) {
+    const errorPayload = payload as { error?: { message?: string } };
+    if (errorPayload.error?.message) {
+      return errorPayload.error.message;
+    }
+  }
+
+  return `Request failed (${status})`;
+}
+
 async function parsePayload(response: Response): Promise<unknown> {
   const contentType = response.headers.get("content-type") || "";
 
@@ -68,7 +90,7 @@ export async function requestJson<T>(path: string, init: RequestInit = {}): Prom
   }
 
   if (!["GET", "HEAD", "OPTIONS"].includes(method) && !headers.has("X-CSRF-Token")) {
-    const csrfToken = getCookie("csrf_token");
+    const csrfToken = csrfTokenResolver?.() || getCookie("csrf_token");
     if (csrfToken) {
       headers.set("X-CSRF-Token", csrfToken);
     }
@@ -83,7 +105,10 @@ export async function requestJson<T>(path: string, init: RequestInit = {}): Prom
   const payload = await parsePayload(response);
 
   if (!response.ok) {
-    throw new ApiError(`Request failed (${response.status})`, response.status, payload);
+    if (response.status === 401) {
+      unauthorizedHandler?.();
+    }
+    throw new ApiError(getErrorMessage(payload, response.status), response.status, payload);
   }
 
   return payload as T;

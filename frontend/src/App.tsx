@@ -1,7 +1,12 @@
-import { AppShell } from "@/app/app-shell";
+import { AppRoutes } from "@/app/app-routes";
+import { AuthProvider } from "@/features/auth/auth-context";
 
 function App() {
-  return <AppShell />;
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
 }
 
 export default App;
