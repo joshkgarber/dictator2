@@ -33,6 +33,7 @@ export function AppShell() {
   const [isSessionOverOpen, setIsSessionOverOpen] = useState(false);
   const [lastCompletedSession, setLastCompletedSession] = useState<SessionState | null>(null);
   const [scheduleRefreshToken, setScheduleRefreshToken] = useState(0);
+  const [textToEditFromHistory, setTextToEditFromHistory] = useState<number | null>(null);
 
   const healthRequest = useApiRequest(fetchHealth);
 
@@ -103,8 +104,22 @@ export function AppShell() {
                 }}
               />
             )}
-            {activeTab === "texts" && <TextsView />}
-            {activeTab === "history" && <HistoryView />}
+            {activeTab === "texts" && (
+              <TextsView
+                openTextId={textToEditFromHistory}
+                onOpenTextHandled={() => {
+                  setTextToEditFromHistory(null);
+                }}
+              />
+            )}
+            {activeTab === "history" && (
+              <HistoryView
+                onEditText={(textId) => {
+                  setTextToEditFromHistory(textId);
+                  setActiveTab("texts");
+                }}
+              />
+            )}
           </section>
         </section>
       </div>

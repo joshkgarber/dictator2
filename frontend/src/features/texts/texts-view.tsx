@@ -184,7 +184,12 @@ function getReadinessState(text: TextRecord, detail?: TextReadiness) {
   };
 }
 
-export function TextsView() {
+type TextsViewProps = {
+  openTextId?: number | null;
+  onOpenTextHandled?: () => void;
+};
+
+export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewProps) {
   const [mode, setMode] = useState<DialogMode>(null);
   const [selectedTextId, setSelectedTextId] = useState<number | null>(null);
   const [texts, setTexts] = useState<TextRecord[]>([]);
@@ -227,6 +232,25 @@ export function TextsView() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (openTextId === null) {
+      return;
+    }
+
+    const matchingText = texts.find((text) => text.id === openTextId);
+    if (matchingText) {
+      setSelectedTextId(matchingText.id);
+      setMode("edit");
+      onOpenTextHandled?.();
+      return;
+    }
+
+    if (!isLoading) {
+      setErrorMessage("That text is no longer available.");
+      onOpenTextHandled?.();
+    }
+  }, [isLoading, onOpenTextHandled, openTextId, texts]);
 
   const selectedText = useMemo(() => {
     if (selectedTextId === null) {

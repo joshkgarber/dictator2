@@ -67,6 +67,10 @@ type SessionResponse = {
   session: SessionState;
 };
 
+type ListSessionsResponse = {
+  sessions: SessionHistoryRecord[];
+};
+
 type CreateAttemptResponse = {
   attempt: {
     id: number;
@@ -116,6 +120,21 @@ export type TutorFeedback = {
   lineText: string;
   modelName: string | null;
   responseText: string;
+};
+
+export type SessionHistoryRecord = {
+  id: number;
+  textId: number;
+  textName: string;
+  textLevel: string;
+  reps: number;
+  status: "in_progress" | "completed" | "incomplete" | "abandoned";
+  startedAt: string;
+  endedAt: string | null;
+  durationSeconds: number | null;
+  rawScore: number;
+  weightedScore: number | null;
+  totalClips: number;
 };
 
 type CreateTutorFeedbackResponse = {
@@ -174,6 +193,13 @@ export async function completeSession(sessionId: number): Promise<SessionState> 
     body: JSON.stringify({}),
   });
   return response.session;
+}
+
+export async function fetchSessionHistory(): Promise<SessionHistoryRecord[]> {
+  const response = await requestJson<ListSessionsResponse>("/api/sessions?status=completed", {
+    method: "GET",
+  });
+  return response.sessions;
 }
 
 export async function exitSession(sessionId: number): Promise<SessionState> {
