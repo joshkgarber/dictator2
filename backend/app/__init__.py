@@ -28,8 +28,13 @@ def create_app(test_config: dict | None = None) -> Flask:
         DATABASE=os.getenv(
             "DATABASE", str(project_root / "backend" / "instance" / "dictator2.sqlite3")
         ),
+        CLIP_STORAGE_ROOT=os.getenv(
+            "CLIP_STORAGE_ROOT", str(project_root / "backend" / "instance" / "clips")
+        ),
         SESSION_COOKIE_NAME=os.getenv("SESSION_COOKIE_NAME", "dictator2_session"),
         AUTH_SESSION_TTL_HOURS=int(os.getenv("AUTH_SESSION_TTL_HOURS", "720")),
+        OPENAI_API_KEY=os.getenv("OPENAI_API_KEY", ""),
+        OPENAI_TUTOR_MODEL=os.getenv("OPENAI_TUTOR_MODEL", "gpt-4o-mini"),
         CORS_ORIGIN=os.getenv("CORS_ORIGIN", "http://localhost:5173"),
         API_PREFIX="/api",
     )
