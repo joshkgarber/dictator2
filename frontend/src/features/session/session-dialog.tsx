@@ -214,15 +214,8 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
 
     startupGuardRef.current = true;
     setIsInitializing(true);
-    setConsoleEntries([
-      { id: 1, tone: "info", text: `Starting session for ${candidate.textName} (Level ${candidate.level}).` },
-      {
-        id: 2,
-        tone: "info",
-        text: "Type attempts normally. Commands only trigger when input exactly matches replay, keep, showdiff, tutor, answer, help, or exit.",
-      },
-    ]);
-    sequenceRef.current = 2;
+    setConsoleEntries([]);
+    sequenceRef.current = 0;
 
     void (async () => {
       try {
