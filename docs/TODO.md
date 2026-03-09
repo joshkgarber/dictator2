@@ -2,13 +2,9 @@
 
 ## P0
 
-- [ ] Tutor command should show a spinner while waiting for the response
-- [ ] Tutor output should be parsed into html.
-- [ ] The attempt input field should be focused after an incorrect attempt
-- [ ] The attempt input field should be focused after using the showdiff command after the output has been printed to the console
-- [ ] The attempt input field should be focused after using the tutor command after the output has been printed to the console
-- [ ] The attempt input field should be focused after using the answer command after the output has been printed to the console
-- [ ] The answer text which is printed when the user uses the "answer" command should not be prefixed with "Answer: "
+- [ ] Remove command acknowledgements and point delta messages from the console output.
+- [ ] font in console should be regular, not monospace.
+- [ ] Repetition feature is missing. The keep command should only be available when reps > 0. Otherwise, keep should still be evaluated as a command, but help text in the console output to say keep is not available here.
 
 ## P1
 
@@ -16,6 +12,7 @@
 - [ ] The showdiff command isn't creating the correct output. While the mechanics and logic of the output is correct, it should not be displayed like that. Instead of displaying square brackets around the words which are incorrect, the words which are correct should be displayed in green and the words which are incorrect should be displayed in red.
 - [ ] There should not be a replay button in the top right. Currently the tutor spinner is rendered here. Move that to another location because this is being removed.
 - [ ] The help command should toggle the instructions panel.
+- [ ] Make the tutor spinner more pronounced.
 
 ## P2
 
@@ -26,3 +23,4 @@
 - [ ] The date picker fields have two calendar icons on them and they overlap.
 - [ ] On the schedule view, it says plan and launch your next sessions. It should say view your schedule and launch your next session.
 - [ ] The calendar panel on the schedule view is too narrow, it needs to be wider so that there's no overflow of the session indicator pills within the day boxes.
+- [ ] Score should not be % but multiplied by 100 when displayed, and shows 2 decimal places.
