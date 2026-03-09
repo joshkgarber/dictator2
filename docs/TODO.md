@@ -13,6 +13,7 @@
 - [ ] There should not be a replay button in the top right. Currently the tutor spinner is rendered here. Move that to another location because this is being removed.
 - [ ] The help command should toggle the instructions panel.
 - [ ] Make the tutor spinner more pronounced.
+- [ ] Set styles for tutor output (possible in a box with a light colored background and in effect a separate stylesheet)
 
 ## P2
 

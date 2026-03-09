@@ -312,11 +312,16 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         appendConsole("info", `Command showdiff accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
         if (diff.mode === "word_count_mismatch") {
           appendConsole("error", `${diff.message || "Word count mismatch."}`);
+          setTimeout(() => {
+            inputRef.current?.focus();
+          }, 0);
           return;
         }
         const rendered = diff.words.map((word) => (word.isMatch ? word.word : `[${word.word}]`)).join(" ");
         appendConsole("info", `Diff: ${rendered}`);
-        inputRef.current?.focus();
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
         return;
       }
 
@@ -333,7 +338,9 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         } finally {
           if (mountedRef.current) {
             setIsSubmitting(false);
-            inputRef.current?.focus();
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 0);
           }
         }
         return;
@@ -347,7 +354,9 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
             : eventResult.session.current.line?.text || "(line unavailable)";
         appendConsole("info", `Command answer accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
         appendConsole("answer", answerText);
-        inputRef.current?.focus();
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
         return;
       }
 
@@ -395,7 +404,9 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           appendConsole("success", normalized);
         } else {
           appendConsole("error", normalized);
-          inputRef.current?.focus();
+          setTimeout(() => {
+            inputRef.current?.focus();
+          }, 0);
         }
         await tryCompleteSession(response.session);
       } catch (error) {
@@ -403,7 +414,9 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       } finally {
         if (mountedRef.current) {
           setIsSubmitting(false);
-          inputRef.current?.focus();
+          setTimeout(() => {
+            inputRef.current?.focus();
+          }, 0);
         }
       }
     },
