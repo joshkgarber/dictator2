@@ -375,9 +375,9 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         setSession(response.session);
         setAttempt("");
         if (response.attempt.isCorrect) {
-          appendConsole("success", `Attempt correct for clip ${response.attempt.clipIndex}.`);
+          appendConsole("success", normalized);
         } else {
-          appendConsole("error", `Attempt incorrect for clip ${response.attempt.clipIndex}.`);
+          appendConsole("error", normalized);
         }
         await tryCompleteSession(response.session);
       } catch (error) {
