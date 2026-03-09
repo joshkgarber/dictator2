@@ -311,7 +311,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         const diff = await fetchSessionDiff(activeSession.id);
         appendConsole("info", `Command showdiff accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
         if (diff.mode === "word_count_mismatch") {
-          appendConsole("error", `Diff: ${diff.message || "Word count mismatch."}`);
+          appendConsole("error", `${diff.message || "Word count mismatch."}`);
           return;
         }
         const rendered = diff.words.map((word) => (word.isMatch ? word.word : `[${word.word}]`)).join(" ");
@@ -329,7 +329,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
             ALLOWED_TAGS: ["p", "br", "strong", "em", "ul", "ol", "li", "code", "pre", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "a"],
           });
           appendConsole("info", `Command tutor accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
-          appendConsole("info", `Tutor: ${feedback.responseText}`, sanitized);
+          appendConsole("info", `${feedback.responseText}`, sanitized);
         } finally {
           if (mountedRef.current) {
             setIsSubmitting(false);
