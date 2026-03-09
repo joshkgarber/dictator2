@@ -251,7 +251,9 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
 
     const onEnded = () => {
       setIsPlayingClip(false);
-      inputRef.current?.focus();
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
     };
 
     const onPause = () => {
