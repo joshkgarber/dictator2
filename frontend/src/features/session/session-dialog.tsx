@@ -330,7 +330,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
             ? eventLine.text
             : eventResult.session.current.line?.text || "(line unavailable)";
         appendConsole("info", `Command answer accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
-        appendConsole("answer", `Answer: ${answerText}`);
+        appendConsole("answer", answerText);
         return;
       }
 
