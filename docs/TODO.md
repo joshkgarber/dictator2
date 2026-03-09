@@ -14,7 +14,7 @@
 
 - [ ] Implement up and down arrow listeners to enable historical input fill, similar to bash history.
 - [ ] The showdiff command isn't creating the correct output. While the mechanics and logic of the output is correct, it should not be displayed like that. Instead of displaying square brackets around the words which are incorrect, the words which are correct should be displayed in green and the words which are incorrect should be displayed in red.
-- [ ] There should not be a replay button in the top right.
+- [ ] There should not be a replay button in the top right. Currently the tutor spinner is rendered here. Move that to another location because this is being removed.
 - [ ] The help command should toggle the instructions panel.
 
 ## P2
