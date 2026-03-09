@@ -27,7 +27,7 @@ type SessionDialogProps = {
   onSessionOver: (session: SessionState) => void;
 };
 
-type ConsoleTone = "info" | "success" | "error";
+type ConsoleTone = "info" | "success" | "error" | "answer";
 
 type ConsoleEntry = {
   id: number;
@@ -330,7 +330,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
             ? eventLine.text
             : eventResult.session.current.line?.text || "(line unavailable)";
         appendConsole("info", `Command answer accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
-        appendConsole("success", `Answer: ${answerText}`);
+        appendConsole("answer", `Answer: ${answerText}`);
         return;
       }
 
@@ -489,6 +489,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
                     entry.tone === "info" && "text-slate-700",
                     entry.tone === "success" && "text-emerald-700",
                     entry.tone === "error" && "text-rose-700",
+                    entry.tone === "answer" && "text-amber-600",
                   )}
                 >
                   {entry.text}
