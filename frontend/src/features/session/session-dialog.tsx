@@ -316,6 +316,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         }
         const rendered = diff.words.map((word) => (word.isMatch ? word.word : `[${word.word}]`)).join(" ");
         appendConsole("info", `Diff: ${rendered}`);
+        inputRef.current?.focus();
         return;
       }
 
@@ -346,6 +347,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
             : eventResult.session.current.line?.text || "(line unavailable)";
         appendConsole("info", `Command answer accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
         appendConsole("answer", answerText);
+        inputRef.current?.focus();
         return;
       }
 
@@ -393,6 +395,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           appendConsole("success", normalized);
         } else {
           appendConsole("error", normalized);
+          inputRef.current?.focus();
         }
         await tryCompleteSession(response.session);
       } catch (error) {
