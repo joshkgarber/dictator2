@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
 import { LoaderCircle, Volume2 } from "lucide-react";
 
 import { FormField } from "@/components/shared/form-primitives";
@@ -33,6 +35,7 @@ type ConsoleEntry = {
   id: number;
   tone: ConsoleTone;
   text: string;
+  html?: string;
 };
 
 function formatPoints(points: number): string {
@@ -89,9 +92,9 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
     };
   }, []);
 
-  const appendConsole = useCallback((tone: ConsoleTone, text: string) => {
+  const appendConsole = useCallback((tone: ConsoleTone, text: string, html?: string) => {
     sequenceRef.current += 1;
-    const entry = { id: sequenceRef.current, tone, text };
+    const entry = { id: sequenceRef.current, tone, text, html };
     setConsoleEntries((previous) => [...previous, entry]);
   }, []);
 
@@ -317,9 +320,21 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       }
 
       if (command === "tutor") {
-        const feedback = await fetchSessionTutorFeedback(activeSession.id);
-        appendConsole("info", `Command tutor accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
-        appendConsole("info", `Tutor: ${feedback.responseText}`);
+        setIsSubmitting(true);
+        try {
+          const feedback = await fetchSessionTutorFeedback(activeSession.id);
+          const html = await marked.parse(feedback.responseText);
+          const sanitized = DOMPurify.sanitize(html, {
+            ALLOWED_TAGS: ["p", "br", "strong", "em", "ul", "ol", "li", "code", "pre", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "a"],
+          });
+          appendConsole("info", `Command tutor accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
+          appendConsole("info", `Tutor: ${feedback.responseText}`, sanitized);
+        } finally {
+          if (mountedRef.current) {
+            setIsSubmitting(false);
+            inputRef.current?.focus();
+          }
+        }
         return;
       }
 
@@ -491,8 +506,10 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
                     entry.tone === "error" && "text-rose-700",
                     entry.tone === "answer" && "text-amber-600",
                   )}
+                  // eslint-disable-next-line react/no-danger
+                  dangerouslySetInnerHTML={entry.html ? { __html: entry.html } : undefined}
                 >
-                  {entry.text}
+                  {!entry.html && entry.text}
                 </p>
               ))}
             </div>
