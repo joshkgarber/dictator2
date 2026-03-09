@@ -312,6 +312,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         appendConsole("info", `Command showdiff accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
         if (diff.mode === "word_count_mismatch") {
           appendConsole("error", `${diff.message || "Word count mismatch."}`);
+          inputRef.current?.focus();
           return;
         }
         const rendered = diff.words.map((word) => (word.isMatch ? word.word : `[${word.word}]`)).join(" ");
