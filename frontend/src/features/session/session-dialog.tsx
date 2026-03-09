@@ -77,7 +77,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
   const completionGuardRef = useRef(false);
   const closingGuardRef = useRef(false);
   const sequenceRef = useRef(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const consoleRef = useRef<HTMLDivElement | null>(null);
   const playedClipKeyRef = useRef<string | null>(null);
@@ -107,13 +107,12 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
     setIsSubmitting(false);
     setIsPlayingClip(false);
     setIsInstructionsOpen(true);
-    const audio = audioRef.current;
-    if (audio) {
-      audio.pause();
-      audio.removeAttribute("src");
-      audio.load();
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.removeAttribute("src");
+      audioElement.load();
     }
-  }, []);
+  }, [audioElement]);
 
   const playCurrentClip = useCallback(
     async (activeSession: SessionState) => {
@@ -122,24 +121,23 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         return;
       }
 
-      const audio = audioRef.current;
-      if (!audio) {
+      if (!audioElement) {
         return;
       }
 
       try {
         setIsPlayingClip(true);
-        if (audio.src !== clipUrl) {
-          audio.src = clipUrl;
+        if (audioElement.src !== clipUrl) {
+          audioElement.src = clipUrl;
         }
-        audio.currentTime = 0;
-        await audio.play();
+        audioElement.currentTime = 0;
+        await audioElement.play();
       } catch {
         setIsPlayingClip(false);
         appendConsole("error", "Clip autoplay was blocked. Type replay to play this clip.");
       }
     },
-    [appendConsole],
+    [appendConsole, audioElement],
   );
 
   const tryCompleteSession = useCallback(
@@ -247,8 +245,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
   }, [appendConsole, candidate, open, resetDialogState]);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
+    if (!audioElement) {
       return;
     }
 
@@ -258,19 +255,19 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
     };
 
     const onPause = () => {
-      if (!audio.ended) {
+      if (!audioElement.ended) {
         setIsPlayingClip(false);
       }
     };
 
-    audio.addEventListener("ended", onEnded);
-    audio.addEventListener("pause", onPause);
+    audioElement.addEventListener("ended", onEnded);
+    audioElement.addEventListener("pause", onPause);
 
     return () => {
-      audio.removeEventListener("ended", onEnded);
-      audio.removeEventListener("pause", onPause);
+      audioElement.removeEventListener("ended", onEnded);
+      audioElement.removeEventListener("pause", onPause);
     };
-  }, []);
+  }, [audioElement]);
 
   useEffect(() => {
     if (!session) {
@@ -526,7 +523,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         )}
       </div>
 
-      <audio ref={audioRef} preload="auto" className="hidden" />
+      <audio ref={setAudioElement} preload="auto" className="hidden" />
     </Dialog>
   );
 }
