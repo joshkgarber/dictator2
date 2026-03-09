@@ -69,7 +69,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
   const [isInitializing, setIsInitializing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPlayingClip, setIsPlayingClip] = useState(false);
-  const [isInstructionsOpen, setIsInstructionsOpen] = useState(true);
+  const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
   const [consoleEntries, setConsoleEntries] = useState<ConsoleEntry[]>([]);
 
   const mountedRef = useRef(false);
@@ -106,7 +106,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
     setIsInitializing(false);
     setIsSubmitting(false);
     setIsPlayingClip(false);
-    setIsInstructionsOpen(true);
+    setIsInstructionsOpen(false);
     if (audioElement) {
       audioElement.pause();
       audioElement.removeAttribute("src");
