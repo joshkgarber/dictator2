@@ -497,21 +497,33 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
               className="h-[280px] overflow-y-auto rounded-md border border-slate-300 bg-white p-3 font-mono text-sm leading-6"
             >
               {consoleEntries.length === 0 && <p className="text-slate-500">Session output will appear here.</p>}
-              {consoleEntries.map((entry) => (
-                <p
-                  key={entry.id}
-                  className={cn(
-                    entry.tone === "info" && "text-slate-700",
-                    entry.tone === "success" && "text-emerald-700",
-                    entry.tone === "error" && "text-rose-700",
-                    entry.tone === "answer" && "text-amber-600",
-                  )}
-                  // eslint-disable-next-line react/no-danger
-                  dangerouslySetInnerHTML={entry.html ? { __html: entry.html } : undefined}
-                >
-                  {!entry.html && entry.text}
-                </p>
-              ))}
+              {consoleEntries.map((entry) =>
+                entry.html ? (
+                  <p
+                    key={entry.id}
+                    className={cn(
+                      entry.tone === "info" && "text-slate-700",
+                      entry.tone === "success" && "text-emerald-700",
+                      entry.tone === "error" && "text-rose-700",
+                      entry.tone === "answer" && "text-amber-600",
+                    )}
+                    // eslint-disable-next-line react/no-danger
+                    dangerouslySetInnerHTML={{ __html: entry.html }}
+                  />
+                ) : (
+                  <p
+                    key={entry.id}
+                    className={cn(
+                      entry.tone === "info" && "text-slate-700",
+                      entry.tone === "success" && "text-emerald-700",
+                      entry.tone === "error" && "text-rose-700",
+                      entry.tone === "answer" && "text-amber-600",
+                    )}
+                  >
+                    {entry.text}
+                  </p>
+                ),
+              )}
             </div>
           </form>
         </section>
