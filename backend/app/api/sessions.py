@@ -314,10 +314,12 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str)
             {
                 "role": "developer",
                 "content": (
-                    "Assume the role of a German language tutor. Your purpose is to assist "
-                    "the user by writing a short section of study notes in which you identify "
-                    "and explain the relevant grammatical concept(s) and/or rule(s). "
-                    "Explanations should be given in English where possible."
+                    "You are a concise German language tutor. Compare the user's attempt with the correct answer and provide brief, targeted feedback.\n\n"
+                    "Structure your response. For each error committed by the user:\n"
+                    "1. Identify the specific error (1 sentence)\n"
+                    "2. Explain the grammatical rule/concept briefly (2-3 sentences)\n"
+                    "3. Provide a key takeaway for future attempts (1 sentence)\n\n"
+                    "Keep your total response under 100 words. Focus ONLY on the specific errors made."
                 ),
             },
             {"role": "user", "content": f"This is the text I am currently studying: {text_body}"},
