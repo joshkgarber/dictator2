@@ -38,13 +38,6 @@ type ConsoleEntry = {
   html?: string;
 };
 
-function formatPoints(points: number): string {
-  if (points === 0) {
-    return "0";
-  }
-  return points > 0 ? `+${points}` : `${points}`;
-}
-
 function getApiErrorMessage(error: unknown): string {
   if (error instanceof ApiError && typeof error.payload === "object" && error.payload !== null) {
     const payload = error.payload as { error?: { message?: string } };
@@ -302,14 +295,12 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       }
 
       if (command === "replay") {
-        appendConsole("info", `Command replay accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
         await playCurrentClip(eventResult.session);
         return;
       }
 
       if (command === "showdiff") {
         const diff = await fetchSessionDiff(activeSession.id);
-        appendConsole("info", `Command showdiff accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
         if (diff.mode === "word_count_mismatch") {
           appendConsole("error", `${diff.message || "Word count mismatch."}`);
           setTimeout(() => {
@@ -333,7 +324,6 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           const sanitized = DOMPurify.sanitize(html, {
             ALLOWED_TAGS: ["p", "br", "strong", "em", "ul", "ol", "li", "code", "pre", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "a"],
           });
-          appendConsole("info", `Command tutor accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
           appendConsole("info", `${feedback.responseText}`, sanitized);
         } finally {
           if (mountedRef.current) {
@@ -352,7 +342,6 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           typeof eventLine === "object" && eventLine !== null && "text" in eventLine && typeof eventLine.text === "string"
             ? eventLine.text
             : eventResult.session.current.line?.text || "(line unavailable)";
-        appendConsole("info", `Command answer accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
         appendConsole("answer", answerText);
         setTimeout(() => {
           inputRef.current?.focus();
@@ -361,7 +350,6 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       }
 
       if (command === "keep") {
-        appendConsole("info", `Command keep accepted. Score delta ${formatPoints(eventResult.event.pointsDelta)}.`);
         await tryCompleteSession(eventResult.session);
         return;
       }
