@@ -59,11 +59,11 @@ export function Dialog({
         <button
           type="button"
           aria-label="Close dialog"
-          className="absolute inset-0 cursor-default bg-slate-950/45"
+          className="absolute inset-0 cursor-default bg-slate-950"
           onClick={() => onOpenChange(false)}
         />
       ) : (
-        <div className="absolute inset-0 bg-slate-950/45" />
+        <div className="absolute inset-0 bg-slate-950" />
       )}
 
       <section
