@@ -31,6 +31,10 @@ type SessionDialogProps = {
 
 type ConsoleTone = "info" | "success" | "error" | "answer";
 
+function createColoredSpan(text: string, className: string): string {
+  return `<span class="${className}">${text}</span>`;
+}
+
 type ConsoleEntry = {
   id: number;
   tone: ConsoleTone;
@@ -302,14 +306,20 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       if (command === "showdiff") {
         const diff = await fetchSessionDiff(activeSession.id);
         if (diff.mode === "word_count_mismatch") {
-          appendConsole("error", `${diff.message || "Word count mismatch."}`);
+          const warningHtml = createColoredSpan(diff.message || "Word count mismatch.", "text-amber-600");
+          appendConsole("error", diff.message || "Word count mismatch.", warningHtml);
           setTimeout(() => {
             inputRef.current?.focus();
           }, 0);
           return;
         }
-        const rendered = diff.words.map((word) => (word.isMatch ? word.word : `[${word.word}]`)).join(" ");
-        appendConsole("info", `Diff: ${rendered}`);
+        const htmlWords = diff.words.map((word) => {
+          const className = word.isMatch ? "text-emerald-700" : "text-rose-700";
+          return createColoredSpan(word.word, className);
+        });
+        const html = `Diff: ${htmlWords.join(" ")}`;
+        const text = `Diff: ${diff.words.map((word) => word.word).join(" ")}`;
+        appendConsole("info", text, html);
         setTimeout(() => {
           inputRef.current?.focus();
         }, 0);
