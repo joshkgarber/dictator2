@@ -321,8 +321,8 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           const className = word.isMatch ? "text-emerald-700" : "text-rose-700";
           return createColoredSpan(word.word, className);
         });
-        const html = `Diff: ${htmlWords.join(" ")}`;
-        const text = `Diff: ${diff.words.map((word) => word.word).join(" ")}`;
+        const html = htmlWords.join(" ");
+        const text = diff.words.map((word) => word.word).join(" ");
         appendConsole("info", text, html);
         setTimeout(() => {
           inputRef.current?.focus();
