@@ -54,7 +54,7 @@ export function Dialog({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 grid place-items-center p-4">
       {dismissible ? (
         <button
           type="button"
