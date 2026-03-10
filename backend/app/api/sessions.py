@@ -315,7 +315,7 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str)
                 "role": "developer",
                 "content": (
                     "You are a concise German language tutor. Compare the user's attempt with the correct answer and provide brief, targeted feedback.\n\n"
-                    "Structure your response:\n"
+                    "Structure your response. For each error committed by the user:\n"
                     "1. Identify the specific error (1 sentence)\n"
                     "2. Explain the grammatical rule/concept briefly (2-3 sentences)\n"
                     "3. Provide a key takeaway for future attempts (1 sentence)\n\n"
