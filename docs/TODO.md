@@ -2,20 +2,23 @@
 
 ## P0
 
-- [ ] Implement up and down arrow listeners to enable historical input fill, similar to bash history.
-- [ ] Remove command acknowledgements and point delta messages from the console output.
-- [ ] font in console should be regular, not monospace.
-- [ ] Repetition feature is missing. The keep command should only be available when reps > 0. Otherwise, keep should still be evaluated as a command, but help text in the console output to say keep is not available here.
-- [ ] Refine the ai prompt to draw more concise and targeted replies directed at the evaluation criteria used by the app.
-- [ ] During a session, the dialog background should be pure black.
+### Ready
+
+
+### Needs Refinement
+
+- [ ] Set styles for tutor output (possibly in a box with a light colored background and in effect a separate stylesheet)
+    - need to fix the scroll behavior. the user always has to scroll up to view the beginning of the content. maybe a side bar similar to instructions.
+        - then you could have a pill similar to the "replayed" one which you can click to open the side panel. Although initially it will open itself.
+        - need a wireframe for this.
+    - I'm now thinking all command outputs should be discernible in a uniform way, such as a small component-look like a border, some padding and a background, along with a tiny indicator of the command used. but perhaps this should be for answer, and showdiff only. Tutor is a bit different. And replay is different again. Keep is similar to replay (as in no text content or app message is logged to the console.)
 
 ## P1
 
-- [ ] The showdiff command isn't creating the correct output. While the mechanics and logic of the output is correct, it should not be displayed like that. Instead of displaying square brackets around the words which are incorrect, the words which are correct should be displayed in green and the words which are incorrect should be displayed in red.
+- [ ] Repetition feature is missing. The keep command should only be available when reps > 0. Otherwise, keep should still be evaluated as a command, but help text in the console output to say keep is not available here.
 - [ ] There should not be a replay button in the top right. Currently the tutor spinner is rendered here. Move that to another location because this is being removed.
 - [ ] The help command should toggle the instructions panel.
 - [ ] Make the tutor spinner more pronounced.
-- [ ] Set styles for tutor output (possible in a box with a light colored background and in effect a separate stylesheet)
 - [ ] The replay command should add a small component to the log (using html) saying "clip x replayed".
 
 ## P2
