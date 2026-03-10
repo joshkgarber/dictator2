@@ -65,6 +65,8 @@ function toReservedCommand(value: string): SessionCommand | null {
 
 export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: SessionDialogProps) {
   const [attempt, setAttempt] = useState("");
+  const [inputHistory, setInputHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [session, setSession] = useState<SessionState | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -101,6 +103,8 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
     closingGuardRef.current = false;
     playedClipKeyRef.current = null;
     setAttempt("");
+    setInputHistory([]);
+    setHistoryIndex(-1);
     setSession(null);
     setConsoleEntries([]);
     setIsInitializing(false);
@@ -391,12 +395,16 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       try {
         if (command) {
           await runCommand(command, session);
+          setInputHistory((prev) => [...prev, normalized]);
+          setHistoryIndex(-1);
           setAttempt("");
           return;
         }
 
         const response = await submitSessionAttempt(session.id, value);
         setSession(response.session);
+        setInputHistory((prev) => [...prev, value]);
+        setHistoryIndex(-1);
         setAttempt("");
         if (response.attempt.isCorrect) {
           appendConsole("success", normalized);
@@ -499,6 +507,27 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
                 ref={inputRef}
                 value={attempt}
                 onChange={(submitEvent) => setAttempt(submitEvent.target.value)}
+                onKeyDown={(keyboardEvent) => {
+                  if (keyboardEvent.key === "ArrowUp") {
+                    keyboardEvent.preventDefault();
+                    if (inputHistory.length === 0) return;
+                    const newIndex = historyIndex === -1 ? inputHistory.length - 1 : Math.max(0, historyIndex - 1);
+                    setHistoryIndex(newIndex);
+                    setAttempt(inputHistory[newIndex]);
+                  } else if (keyboardEvent.key === "ArrowDown") {
+                    keyboardEvent.preventDefault();
+                    if (inputHistory.length === 0) return;
+                    if (historyIndex === -1) return;
+                    const newIndex = historyIndex + 1;
+                    if (newIndex >= inputHistory.length) {
+                      setHistoryIndex(-1);
+                      setAttempt("");
+                    } else {
+                      setHistoryIndex(newIndex);
+                      setAttempt(inputHistory[newIndex]);
+                    }
+                  }
+                }}
                 className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
                 placeholder={isPlayingClip ? "Clip is playing..." : "Type attempt or exact command..."}
                 disabled={isBusy || isPlayingClip || !session || session.status !== "in_progress"}
