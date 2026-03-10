@@ -302,14 +302,20 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       if (command === "showdiff") {
         const diff = await fetchSessionDiff(activeSession.id);
         if (diff.mode === "word_count_mismatch") {
-          appendConsole("error", `${diff.message || "Word count mismatch."}`);
+          const warningHtml = `<span style="color: #eab308;">${diff.message || "Word count mismatch."}</span>`;
+          appendConsole("error", diff.message || "Word count mismatch.", warningHtml);
           setTimeout(() => {
             inputRef.current?.focus();
           }, 0);
           return;
         }
-        const rendered = diff.words.map((word) => (word.isMatch ? word.word : `[${word.word}]`)).join(" ");
-        appendConsole("info", `Diff: ${rendered}`);
+        const htmlWords = diff.words.map((word) => {
+          const color = word.isMatch ? "#22c55e" : "#ef4444";
+          return `<span style="color: ${color};">${word.word}</span>`;
+        });
+        const html = `Diff: ${htmlWords.join(" ")}`;
+        const text = `Diff: ${diff.words.map((word) => word.word).join(" ")}`;
+        appendConsole("info", text, html);
         setTimeout(() => {
           inputRef.current?.focus();
         }, 0);
