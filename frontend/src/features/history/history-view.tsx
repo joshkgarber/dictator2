@@ -53,8 +53,7 @@ function formatScore(weightedScore: number | null): string {
   if (typeof weightedScore !== "number" || Number.isNaN(weightedScore)) {
     return "-";
   }
-  const clamped = Math.min(Math.max(weightedScore, 0), 100);
-  return `${Math.round(clamped)}%`;
+  return String(Math.round(weightedScore * 100));
 }
 
 const columns: TableColumn<HistoryRecord>[] = [
@@ -72,7 +71,7 @@ const columns: TableColumn<HistoryRecord>[] = [
   {
     id: "score",
     header: "Score",
-    className: "w-24",
+    className: "w-24 text-right",
     cell: (row) => <span className="font-semibold text-slate-900">{row.score}</span>,
   },
 ];
