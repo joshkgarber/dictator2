@@ -501,7 +501,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           </header>
 
           <form onSubmit={onSubmit} className="space-y-3">
-            <FormField label="Attempt Input" htmlFor="attempt-input" hint="Exact commands only: replay, keep, showdiff, tutor, answer, help, exit.">
+            <FormField label="Attempt Input" htmlFor="attempt-input">
               <input
                 id="attempt-input"
                 ref={inputRef}
