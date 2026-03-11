@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 
 import { FormField } from "@/components/shared/form-primitives";
 import { Button } from "@/components/ui/button";
@@ -113,24 +113,21 @@ export function SessionOverDialog({ open, session, onOpenChange, onDone }: Sessi
         </div>
 
         <FormField label="Next session date" htmlFor="next-session-date" hint="Required to complete the post-session flow.">
-          <div className="relative">
-            <input
-              id="next-session-date"
-              type="date"
-              value={nextSessionDate}
-              min={todayIso}
-              onChange={(event) => {
-                setNextSessionDate(event.target.value);
-                if (errorMessage) {
-                  setErrorMessage(null);
-                }
-              }}
-              className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
-              disabled={isSaving}
-              required
-            />
-            <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-5 w-5 text-slate-500" />
-          </div>
+          <input
+            id="next-session-date"
+            type="date"
+            value={nextSessionDate}
+            min={todayIso}
+            onChange={(event) => {
+              setNextSessionDate(event.target.value);
+              if (errorMessage) {
+                setErrorMessage(null);
+              }
+            }}
+            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
+            disabled={isSaving}
+            required
+          />
         </FormField>
       </div>
     </Dialog>
