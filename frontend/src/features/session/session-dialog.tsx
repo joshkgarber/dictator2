@@ -451,7 +451,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       description={headerDescription}
       size="lg"
       footer={
-        <>
+        <div className="flex w-full items-center justify-between">
           <Button
             className="rounded-full bg-gray-200 text-gray-800 hover:bg-red-500 hover:text-white"
             onClick={() => void attemptClose()}
@@ -467,7 +467,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           >
             Instructions
           </Button>
-        </>
+        </div>
       }
     >
       <div className={cn("grid gap-3", isInstructionsOpen ? "md:grid-cols-[1.3fr_1fr]" : "grid-cols-1")}>
@@ -578,7 +578,16 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
 
         {isInstructionsOpen && (
           <aside className="space-y-3 rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-700">
-            <h4 className="font-semibold uppercase tracking-[0.08em] text-slate-700">Instructions</h4>
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold uppercase tracking-[0.08em] text-slate-700">Instructions</h4>
+              <Button
+                variant="outline"
+                className="rounded-full text-xs"
+                onClick={() => setIsInstructionsOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
             <p>
               Listen to each clip, then type your attempt and press Enter. Use a reserved command only when you need a session action.
             </p>
