@@ -4,17 +4,22 @@
 
 ### Ready
 
+- [ ] The "showdiff" command should be shortened to "diff" to support further ease of use.
+- [ ] The abandon button should have white text by default as shown in the wireframe (see `docs/wireframes/schedule_dialog.png`). Keep the black text on hover.
+- [ ] The weighted score in the session over dialog needs to be displayed multiplied by 100 and rounded to the nearest whole number, the same as the history view.
+- [ ] The "start next session" button should only consider texts scheduled for today, i.e. not those overdue and neither those upcoming. Currently it is also starting sessions for texts in the upcoming category. Not sure if it's also starting sessions for overdue. The requirement was already noted in the schedule view wireframe (`docs/wireframes/schedule_view.png`) — see "How it works" text connected to the "start next session button".
+- [ ] In addition to its current function, the replay command should add the words "Clip replayed" in yellow to the console so that the user can see that they replayed the clip at that point.
+- [ ] Tutor command output improvements
+    - When the tutor command is invoked, A placeholder component with the words "Tutor called" and a spinner is added to the console.
+    - When the response is received the placeholder is removed and the response is rendered.
+    - The tutor output is rendered in a container with a purple border.
+    - The tutor output is scrolled smoothly into view.
+    - The tutor output text gets specific styles applied for its own internal consistency (rules for font-family (only one), headings, lists (including nested), horizontal rule, etc.)
 
 ### Needs Refinement
 
-- [ ] Set styles for tutor output (possibly in a box with a light colored background and in effect a separate stylesheet)
-    - need to fix the scroll behavior. the user always has to scroll up to view the beginning of the content. maybe a side bar similar to instructions.
-        - then you could have a pill similar to the "replayed" one which you can click to open the side panel. Although initially it will open itself.
-        - need a wireframe for this.
-    - I'm now thinking all command outputs should be discernible in a uniform way, such as a small component-look like a border, some padding and a background, along with a tiny indicator of the command used. but perhaps this should be for answer, and showdiff only. Tutor is a bit different. And replay is different again. Keep is similar to replay (as in no text content or app message is logged to the console.)
 - [ ] Consider using structured outputs for tutor responses, and then format them for the output/console. This will provide more consistency.
 - [ ] Change "Attempt Input" label to something else (maybe nothing).
-- [ ] The replay command should add a small component to the log (using html) saying "clip x replayed".
 
 ## P1
 
@@ -23,12 +28,17 @@
 - [ ] Repetition feature is missing. The keep command should only be available when reps > 0. Otherwise, keep should still be evaluated as a command, but help text in the console output to say keep is not available here.
 - [ ] Make the tutor spinner more pronounced.
 - [ ] Option for dark mode and system default
-- [ ] The deletion confirmation dialog was not implemented.
 - [ ] Help text needs a lot of love. including using the help command to toggle the instructions panel. and the up/down arrow history feature.
 
 ## P2
 
-- [ ] The "start next session" button shouldn't start a session from the upcoming box. Only overdue and today. This is shown in the schedule view wireframe.
+- [ ] Check the next launch target calculation. It should be older texts first.
 - [ ] I want to know the spread of the score points per clip.
 - [ ] On the schedule view, it says plan and launch your next sessions. It should say view your schedule and launch your next session.
 - [ ] The calendar panel on the schedule view is too narrow, it needs to be wider so that there's no overflow of the session indicator pills within the day boxes.
+
+## P3
+
+- [ ] Convert to a desktop app
+- [ ] Landing page for the project
+- [ ] Open source deployment (via docker)
