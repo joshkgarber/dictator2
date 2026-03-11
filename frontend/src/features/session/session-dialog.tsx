@@ -298,7 +298,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       setSession(eventResult.session);
 
       if (command === "help") {
-        appendConsole("info", "Commands: replay, keep, showdiff, tutor, answer, help, exit.");
+        setIsInstructionsOpen((openState) => !openState);
         return;
       }
 
