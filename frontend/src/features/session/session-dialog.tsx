@@ -577,16 +577,9 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         </section>
 
         {isInstructionsOpen && (
-          <aside className="space-y-3 rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-700">
+          <aside className="flex flex-col gap-3 rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-700">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold uppercase tracking-[0.08em] text-slate-700">Instructions</h4>
-              <Button
-                variant="outline"
-                className="rounded-full text-xs"
-                onClick={() => setIsInstructionsOpen(false)}
-              >
-                Close
-              </Button>
             </div>
             <p>
               Listen to each clip, then type your attempt and press Enter. Use a reserved command only when you need a session action.
@@ -601,6 +594,15 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
             <p className="text-xs text-slate-500">
               Exact matching is enforced. Any other input, including command-like text with extra words, is submitted as an attempt.
             </p>
+            <div className="mt-auto flex justify-center pt-3">
+              <Button
+                variant="outline"
+                className="rounded-full text-xs"
+                onClick={() => setIsInstructionsOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
           </aside>
         )}
       </div>
