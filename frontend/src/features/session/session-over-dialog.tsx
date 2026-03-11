@@ -87,7 +87,7 @@ export function SessionOverDialog({ open, session, onOpenChange, onDone }: Sessi
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Session Over"
+      title="Session Complete!"
       description="Review your result and set the next scheduled date before returning to Schedule."
       size="sm"
       dismissible={false}
