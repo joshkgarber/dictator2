@@ -453,7 +453,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       footer={
         <div className="flex w-full items-center justify-between">
           <Button
-            className="rounded-full bg-gray-200 text-gray-800 hover:bg-red-500 hover:text-white"
+            className="rounded-full bg-gray-200 text-white hover:bg-red-500 hover:text-black"
             onClick={() => void attemptClose()}
             disabled={isBusy}
             title="Warning! Progress will not be saved."
