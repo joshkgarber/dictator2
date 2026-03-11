@@ -4,12 +4,6 @@
 
 ### Ready
 
-- [ ] Change the heading "Session Over" to "Session Complete!" in session over dialog.
-- [ ] Remove the "exact commands only" text under the attempt input box.
-- [ ] The help command should toggle the instructions panel.
-- [ ] There shouldn't be an X button in the top right corner.
-- [ ] The abandon button hasn't been implemented correctly according to the wireframe. -> which wireframe?
-- [ ] Currently, when changing views (schedule/texts/history) the width of the base element is changing. This is bad for UX. So we need to set the width (and while we're at it, also the height) of the base view element (the div under main) so that the dimensions stay consistent. I tested this in devtools and it produced the desired effect: element {width: 80vw; height: 80%;}
 
 ### Needs Refinement
 
