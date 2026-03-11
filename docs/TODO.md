@@ -4,7 +4,7 @@
 
 ### Ready
 
-- [ ] The "showdiff" command should be shortened to "diff" to support further ease of use.
+- [x] The "showdiff" command should be shortened to "diff" to support further ease of use.
 - [ ] The abandon button should have white text by default as shown in the wireframe (see `docs/wireframes/schedule_dialog.png`). Keep the black text on hover.
 - [ ] The weighted score in the session over dialog needs to be displayed multiplied by 100 and rounded to the nearest whole number, the same as the history view.
 - [ ] The "start next session" button should only consider texts scheduled for today, i.e. not those overdue and neither those upcoming. Currently it is also starting sessions for texts in the upcoming category. Not sure if it's also starting sessions for overdue. The requirement was already noted in the schedule view wireframe (`docs/wireframes/schedule_view.png`) — see "How it works" text connected to the "start next session button".

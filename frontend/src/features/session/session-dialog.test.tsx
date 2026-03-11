@@ -15,7 +15,7 @@ import {
 } from "@/lib/api/sessions";
 
 vi.mock("@/lib/api/sessions", () => ({
-  SESSION_COMMANDS: ["replay", "keep", "showdiff", "tutor", "answer", "help", "exit"],
+  SESSION_COMMANDS: ["replay", "keep", "diff", "tutor", "answer", "help", "exit"],
   startTextSession: vi.fn(),
   submitSessionCommand: vi.fn(),
   submitSessionAttempt: vi.fn(),
