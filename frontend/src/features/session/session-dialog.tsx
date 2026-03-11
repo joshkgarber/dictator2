@@ -451,18 +451,23 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       description={headerDescription}
       size="lg"
       footer={
-        <>
-          <Button variant="outline" onClick={() => void attemptClose()} disabled={isBusy}>
-            Exit
+        <div className="flex w-full items-center justify-between">
+          <Button
+            className="rounded-full bg-gray-200 text-gray-800 hover:bg-red-500 hover:text-white"
+            onClick={() => void attemptClose()}
+            disabled={isBusy}
+            title="Warning! Progress will not be saved."
+          >
+            Abandon
           </Button>
           <Button
-            variant="outline"
+            className="rounded-full bg-slate-900 text-white hover:bg-slate-900/90"
             onClick={() => setIsInstructionsOpen((openState) => !openState)}
-            disabled={isBusy || !session || session.status !== "in_progress"}
+            disabled={isInstructionsOpen || isBusy || !session || session.status !== "in_progress"}
           >
-            {isInstructionsOpen ? "Hide Instructions" : "Show Instructions"}
+            Instructions
           </Button>
-        </>
+        </div>
       }
     >
       <div className={cn("grid gap-3", isInstructionsOpen ? "md:grid-cols-[1.3fr_1fr]" : "grid-cols-1")}>
@@ -572,8 +577,10 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         </section>
 
         {isInstructionsOpen && (
-          <aside className="space-y-3 rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-700">
-            <h4 className="font-semibold uppercase tracking-[0.08em] text-slate-700">Instructions</h4>
+          <aside className="flex flex-col gap-3 rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-700">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold uppercase tracking-[0.08em] text-slate-700">Instructions</h4>
+            </div>
             <p>
               Listen to each clip, then type your attempt and press Enter. Use a reserved command only when you need a session action.
             </p>
@@ -587,6 +594,15 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
             <p className="text-xs text-slate-500">
               Exact matching is enforced. Any other input, including command-like text with extra words, is submitted as an attempt.
             </p>
+            <div className="mt-auto flex justify-center pt-3">
+              <Button
+                variant="outline"
+                className="rounded-full text-xs"
+                onClick={() => setIsInstructionsOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
           </aside>
         )}
       </div>
