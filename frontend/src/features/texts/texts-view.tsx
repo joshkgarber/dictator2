@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, CalendarDays, LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDownUp, LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { DataTable, type TableColumn } from "@/components/shared/data-table";
 import { FormField, FormSection } from "@/components/shared/form-primitives";
@@ -732,18 +732,15 @@ function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: T
           </FormField>
 
           <FormField label="Scheduled Date" htmlFor="text-scheduled-date" hint="Required. Used to place the text in the session schedule.">
-            <div className="relative">
-              <input
-                id="text-scheduled-date"
-                type="date"
-                value={scheduledDate}
-                min={todayIso}
-                onChange={(event) => setScheduledDate(event.target.value)}
-                className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
-                required
-              />
-              <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-5 w-5 text-slate-500" />
-            </div>
+            <input
+              id="text-scheduled-date"
+              type="date"
+              value={scheduledDate}
+              min={todayIso}
+              onChange={(event) => setScheduledDate(event.target.value)}
+              className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
+              required
+            />
           </FormField>
         </FormSection>
 
