@@ -4,11 +4,46 @@
 
 ### Ready
 
+- [ ] Use structured outputs for tutor responses, and then format them for the output/console. This will provide more consistency.
+    - Structured output preliminary research findings/idea:
+```py
+# Pseudo/example code
 
+from pydantic import BaseModel
+
+class Correction(BaseModel):
+    error: str
+    explanation: str
+    takeaway: str
+
+class Corrections(BaseModel):
+    corrections: list[Correction]
+
+response = client.responses.parse(
+    model=model_name,
+    input=[
+       ... # inputs as currently existing
+    ],
+    text_format=Corrections, # for structured output definition in api
+)
+
+corrections = response.output_parsed # sdk method to parse structured output
+
+# TODO Validate using pydantic method
+# TODO Return tutor response tuple
+```
+    - Formatting:
+**Your attempt**: {attempt}
+**Correct answer**: {answer}
+
+for i in range(corrections):
+h`Mistake $i`
+p{error}
+p{explanation}
+p{takeaway}
 
 ### Needs Refinement
 
-- [ ] Consider using structured outputs for tutor responses, and then format them for the output/console. This will provide more consistency.
 - [ ] Change "Attempt Input" label to something else (maybe nothing).
 - [ ] Deal with the overflow of main (the background radial gradient cuts off and I would prefer interior scroll areas for the windows within the base views).
 
@@ -34,3 +69,4 @@
 - [ ] Convert to a desktop app
 - [ ] Landing page for the project
 - [ ] Open source deployment (via docker)
+- [ ] Stop saving tutor responses to DB
