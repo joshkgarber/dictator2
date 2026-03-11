@@ -90,7 +90,6 @@ export function SessionOverDialog({ open, session, onOpenChange, onDone }: Sessi
       title="Session Complete!"
       description="Review your result and set the next scheduled date before returning to Schedule."
       size="sm"
-      dismissible={false}
       footer={
         <>
           <Button onClick={() => void saveNextDate()} disabled={isSaving || !session}>

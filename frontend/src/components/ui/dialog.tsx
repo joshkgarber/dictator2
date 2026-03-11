@@ -1,6 +1,5 @@
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -12,7 +11,6 @@ type DialogProps = {
   children: ReactNode;
   footer?: ReactNode;
   size?: "sm" | "md" | "lg";
-  dismissible?: boolean;
 };
 
 const sizeClassName: Record<NonNullable<DialogProps["size"]>, string> = {
@@ -29,42 +27,14 @@ export function Dialog({
   children,
   footer,
   size = "md",
-  dismissible = true,
 }: DialogProps) {
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (dismissible && event.key === "Escape") {
-        onOpenChange(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleEscape);
-
-    return () => {
-      window.removeEventListener("keydown", handleEscape);
-    };
-  }, [dismissible, open, onOpenChange]);
-
   if (!open) {
     return null;
   }
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {dismissible ? (
-        <button
-          type="button"
-          aria-label="Close dialog"
-          className="absolute inset-0 cursor-default bg-slate-950"
-          onClick={() => onOpenChange(false)}
-        />
-      ) : (
-        <div className="absolute inset-0 bg-slate-950" />
-      )}
+      <div className="absolute inset-0 bg-slate-950" />
 
       <section
         role="dialog"
@@ -80,15 +50,6 @@ export function Dialog({
             <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
             {description && <p className="mt-1 text-sm text-slate-700">{description}</p>}
           </div>
-          {dismissible && (
-            <button
-              type="button"
-              className="rounded-md border border-slate-300 bg-white p-1 text-slate-600 transition hover:bg-slate-100"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
         </header>
 
         <div className="max-h-[70vh] overflow-y-auto px-5 py-4">{children}</div>
