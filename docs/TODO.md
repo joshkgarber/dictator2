@@ -9,8 +9,6 @@
 - [ ] The help command should toggle the instructions panel.
 - [ ] There shouldn't be an X button in the top right corner.
 - [ ] The abandon button hasn't been implemented correctly according to the wireframe. -> which wireframe?
-- [ ] The date picker fields have two calendar icons on them and they overlap.
-- [ ] Score should not be expressed as a percentage on the history view. Rather, as a unique score unit specific to this app, which is kind-of like a percentage: The weighted score multiplied by 100 (to make it easier to read) and rounded to the nearest whole number.
 - [ ] Currently, when changing views (schedule/texts/history) the width of the base element is changing. This is bad for UX. So we need to set the width (and while we're at it, also the height) of the base view element (the div under main) so that the dimensions stay consistent. I tested this in devtools and it produced the desired effect: element {width: 80vw; height: 80%;}
 
 ### Needs Refinement
@@ -26,11 +24,13 @@
 
 ## P1
 
+- [ ] The "Due Today" label in the schedule view should be green not yellow.
 - [ ] There should not be a replay button in the top right. Currently the tutor spinner is rendered here. Move that to another location because this is being removed.
 - [ ] Repetition feature is missing. The keep command should only be available when reps > 0. Otherwise, keep should still be evaluated as a command, but help text in the console output to say keep is not available here.
 - [ ] Make the tutor spinner more pronounced.
 - [ ] Option for dark mode and system default
 - [ ] The deletion confirmation dialog was not implemented.
+- [ ] Help text needs a lot of love. including using the help command to toggle the instructions panel. and the up/down arrow history feature.
 
 ## P2
 
