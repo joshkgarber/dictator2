@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarCheck2, ChevronLeft, ChevronRight, LoaderCircle, Play } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { fetchSchedule, type ScheduleEntry } from "@/lib/api/schedule";
@@ -23,6 +24,7 @@ type ScheduleRow = {
   dueLabel: string;
   isReady: boolean;
   bucket: "Overdue" | "Due Today" | "Upcoming";
+  createdAt: string;
 };
 
 type CalendarDay = {
@@ -102,6 +104,7 @@ function toScheduleRows(rows: ScheduleEntry[], todayIso: string): ScheduleRow[] 
     dueLabel: formatDueLabel(row.nextSessionDate, todayIso),
     isReady: row.text.isReady,
     bucket: getDueBucket(row.nextSessionDate, todayIso),
+    createdAt: row.createdAt,
   }));
 }
 
@@ -173,20 +176,16 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
   }, [rows]);
 
   const nextCandidate = useMemo<NextSessionCandidate | null>(() => {
-    const readyRows = rows.filter((row) => row.isReady);
-    if (readyRows.length === 0) {
+    const dueTodayRows = rows.filter((row) => row.bucket === "Due Today");
+    if (dueTodayRows.length === 0) {
       return null;
     }
 
-    const sorted = [...readyRows].sort((a, b) => {
-      const bucketDiff = BUCKET_ORDER[a.bucket] - BUCKET_ORDER[b.bucket];
-      if (bucketDiff !== 0) {
-        return bucketDiff;
+    const sorted = [...dueTodayRows].sort((a, b) => {
+      if (a.level !== b.level) {
+        return a.level.localeCompare(b.level);
       }
-      if (a.dueDate !== b.dueDate) {
-        return a.dueDate.localeCompare(b.dueDate);
-      }
-      return a.textName.localeCompare(b.textName);
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
 
     const candidate = sorted[0];
@@ -245,9 +244,10 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
         </div>
 
         <Button
-          disabled={!nextCandidate || isLoading}
+          disabled={isLoading}
           onClick={() => {
             if (!nextCandidate) {
+              toast.info("No sessions scheduled for today");
               return;
             }
             onStartNextSession(nextCandidate);
@@ -375,7 +375,7 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
                   Next launch target: <span className="font-semibold text-slate-900">{nextCandidate.textName}</span> ({nextCandidate.dueLabel})
                 </p>
               ) : (
-                <p>All scheduled items are blocked because their texts are not ready yet.</p>
+                <p>No sessions scheduled for today.</p>
               )}
             </div>
           )}
