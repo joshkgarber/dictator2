@@ -99,8 +99,10 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
     return entry.id;
   }, []);
 
-  const removeConsoleEntry = useCallback((entryId: number) => {
-    setConsoleEntries((previous) => previous.filter((entry) => entry.id !== entryId));
+  const updateConsoleEntry = useCallback((entryId: number, updates: Partial<ConsoleEntry>) => {
+    setConsoleEntries((previous) =>
+      previous.map((entry) => (entry.id === entryId ? { ...entry, ...updates } : entry)),
+    );
   }, []);
 
   const resetDialogState = useCallback(() => {
@@ -346,7 +348,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           const sanitized = DOMPurify.sanitize(html, {
             ALLOWED_TAGS: ["p", "br", "strong", "em", "ul", "ol", "li", "code", "pre", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "a"],
           });
-          removeConsoleEntry(placeholderId);
+          updateConsoleEntry(placeholderId, { tone: "info", text: "Tutor responded" });
           appendConsole("tutor", `${feedback.responseText}`, sanitized);
           setTimeout(() => {
             tutorOutputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -385,7 +387,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         onOpenChange(false);
       }
     },
-    [appendConsole, onOpenChange, playCurrentClip, removeConsoleEntry, tryCompleteSession],
+    [appendConsole, onOpenChange, playCurrentClip, updateConsoleEntry, tryCompleteSession],
   );
 
   const onSubmit = useCallback(
