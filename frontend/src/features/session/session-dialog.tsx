@@ -452,15 +452,20 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       size="lg"
       footer={
         <>
-          <Button variant="outline" onClick={() => void attemptClose()} disabled={isBusy}>
-            Exit
+          <Button
+            className="rounded-full bg-gray-200 text-gray-800 hover:bg-red-500 hover:text-white"
+            onClick={() => void attemptClose()}
+            disabled={isBusy}
+            title="Warning! Progress will not be saved."
+          >
+            Abandon
           </Button>
           <Button
-            variant="outline"
+            className="rounded-full bg-slate-900 text-white hover:bg-slate-900/90"
             onClick={() => setIsInstructionsOpen((openState) => !openState)}
-            disabled={isBusy || !session || session.status !== "in_progress"}
+            disabled={isInstructionsOpen || isBusy || !session || session.status !== "in_progress"}
           >
-            {isInstructionsOpen ? "Hide Instructions" : "Show Instructions"}
+            Instructions
           </Button>
         </>
       }
