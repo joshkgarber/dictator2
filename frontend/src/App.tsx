@@ -6,7 +6,7 @@ function App() {
   return (
     <AuthProvider>
       <AppRoutes />
-      <Toaster position="bottom-center" />
+      <Toaster position="top-center" />
     </AuthProvider>
   );
 }
