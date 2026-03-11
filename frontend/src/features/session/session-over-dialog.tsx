@@ -104,7 +104,7 @@ export function SessionOverDialog({ open, session, onOpenChange, onDone }: Sessi
 
         <div className="rounded-md border border-slate-300 bg-slate-50 p-3 text-sm text-slate-700">
           <p>
-            Weighted score: <span className="font-semibold text-slate-900">{weightedScore.toFixed(2)}</span>
+            Weighted score: <span className="font-semibold text-slate-900">{Math.round(weightedScore * 100)}</span>
           </p>
           <p>
             Duration: <span className="font-semibold text-slate-900">{formatDuration(session?.durationSeconds ?? null)}</span>
