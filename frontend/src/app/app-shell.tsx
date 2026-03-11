@@ -56,7 +56,7 @@ export function AppShell() {
   return (
     <main className="min-h-screen grid place-items-center bg-app-canvas p-3 md:p-6">
       <div className="mx-auto max-w-[1200px] animate-fade-up">
-        <section className="rounded-2xl border border-slate-400/60 bg-white/95 px-4 py-4 shadow-[0_14px_45px_rgba(18,28,45,0.14)] md:px-6">
+          <section className="h-[80%] w-[80vw] rounded-2xl border border-slate-400/60 bg-white/95 px-4 py-4 shadow-[0_14px_45px_rgba(18,28,45,0.14)] md:px-6">
           <div className="flex flex-col gap-4 border-b border-slate-200 pb-4 md:flex-row md:items-start md:justify-between">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-slate-500">Dictator 2.0 / Desktop</p>
@@ -106,7 +106,7 @@ export function AppShell() {
             })}
           </nav>
 
-          <section className="mt-6 h-[80%] w-[80vw] rounded-xl border border-slate-300 bg-white p-3 md:p-5">
+          <section className="mt-6 rounded-xl border border-slate-300 bg-white p-3 md:p-5">
             {activeTab === "schedule" && (
               <ScheduleView
                 key={scheduleRefreshToken}
