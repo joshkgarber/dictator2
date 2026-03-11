@@ -304,6 +304,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
 
       if (command === "replay") {
         await playCurrentClip(eventResult.session);
+        appendConsole("info", "Clip replayed");
         return;
       }
 
