@@ -71,7 +71,7 @@ const columns: TableColumn<HistoryRecord>[] = [
   {
     id: "score",
     header: "Score",
-    className: "w-24",
+    className: "w-24 text-right",
     cell: (row) => <span className="font-semibold text-slate-900">{row.score}</span>,
   },
 ];
