@@ -14,17 +14,13 @@ from ..db import get_db
 
 logger = logging.getLogger(__name__)
 
-COMMAND_TYPES = {"replay", "keep", "showdiff", "tutor", "answer", "help", "exit"}
+COMMAND_TYPES = {"replay", "keep", "diff", "tutor", "answer", "help", "exit"}
 SESSION_STATUSES = {"in_progress", "completed", "incomplete", "abandoned"}
 
 HELP_COMMANDS = [
     {"name": "replay", "description": "Replay the current audio clip", "shortcut": "Alt+R"},
     {"name": "keep", "description": "Accept your latest attempt and continue", "shortcut": "Alt+K"},
-    {
-        "name": "showdiff",
-        "description": "Show word-level differences from the expected line",
-        "shortcut": "Alt+D",
-    },
+    {"name": "diff", "description": "Show word-level differences from the expected line", "shortcut": "Alt+D"},
     {"name": "tutor", "description": "Request tutor help for your latest attempt", "shortcut": "Alt+T"},
     {"name": "answer", "description": "Reveal the expected answer", "shortcut": "Alt+A"},
     {"name": "help", "description": "Show available commands", "shortcut": "Alt+H"},
@@ -825,10 +821,10 @@ def create_session_event(session_id: int):
 
     if event_type == "replay":
         points_delta = _get_scoring_rule(get_db(), "replay", fallback=1.0)
-    elif event_type == "showdiff":
+    elif event_type == "diff":
         if latest_attempt is None:
             return error_response("VALIDATION_ERROR", "No previous attempt to show diff for", 400)
-        points_delta = _get_scoring_rule(get_db(), "showdiff", fallback=1.0)
+        points_delta = _get_scoring_rule(get_db(), "diff", fallback=1.0)
         details["attemptId"] = int(latest_attempt["id"])
     elif event_type == "tutor":
         if latest_attempt is None:

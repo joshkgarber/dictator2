@@ -307,7 +307,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         return;
       }
 
-      if (command === "showdiff") {
+      if (command === "diff") {
         const diff = await fetchSessionDiff(activeSession.id);
         if (diff.mode === "word_count_mismatch") {
           const warningHtml = createColoredSpan(diff.message || "Word count mismatch.", "text-amber-600");
