@@ -29,7 +29,7 @@ type SessionDialogProps = {
   onSessionOver: (session: SessionState) => void;
 };
 
-type ConsoleTone = "info" | "success" | "error" | "answer";
+type ConsoleTone = "info" | "success" | "error" | "answer" | "tutor" | "tutor-placeholder";
 
 function createColoredSpan(text: string, className: string): string {
   return `<span class="${className}">${text}</span>`;
@@ -82,6 +82,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const consoleRef = useRef<HTMLDivElement | null>(null);
+  const tutorOutputRef = useRef<HTMLDivElement | null>(null);
   const playedClipKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -95,6 +96,11 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
     sequenceRef.current += 1;
     const entry = { id: sequenceRef.current, tone, text, html };
     setConsoleEntries((previous) => [...previous, entry]);
+    return entry.id;
+  }, []);
+
+  const removeConsoleEntry = useCallback((entryId: number) => {
+    setConsoleEntries((previous) => previous.filter((entry) => entry.id !== entryId));
   }, []);
 
   const resetDialogState = useCallback(() => {
@@ -332,6 +338,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       }
 
       if (command === "tutor") {
+        const placeholderId = appendConsole("tutor-placeholder", "Tutor called");
         setIsSubmitting(true);
         try {
           const feedback = await fetchSessionTutorFeedback(activeSession.id);
@@ -339,7 +346,11 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           const sanitized = DOMPurify.sanitize(html, {
             ALLOWED_TAGS: ["p", "br", "strong", "em", "ul", "ol", "li", "code", "pre", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "a"],
           });
-          appendConsole("info", `${feedback.responseText}`, sanitized);
+          removeConsoleEntry(placeholderId);
+          appendConsole("tutor", `${feedback.responseText}`, sanitized);
+          setTimeout(() => {
+            tutorOutputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 100);
         } finally {
           if (mountedRef.current) {
             setIsSubmitting(false);
@@ -374,7 +385,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         onOpenChange(false);
       }
     },
-    [appendConsole, onOpenChange, playCurrentClip, tryCompleteSession],
+    [appendConsole, onOpenChange, playCurrentClip, removeConsoleEntry, tryCompleteSession],
   );
 
   const onSubmit = useCallback(
@@ -546,15 +557,28 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
               className="h-[280px] overflow-y-auto rounded-md border border-slate-300 bg-white p-3 text-sm leading-6"
             >
               {consoleEntries.length === 0 && <p className="text-slate-500">Session output will appear here.</p>}
-              {consoleEntries.map((entry) =>
-                entry.html ? (
-                  <p
+              {consoleEntries.map((entry) => {
+                if (entry.tone === "tutor-placeholder") {
+                  return (
+                    <div
+                      key={entry.id}
+                      className="flex items-center gap-2 rounded-md border border-purple-300 bg-purple-50 px-3 py-2 text-purple-700"
+                    >
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">{entry.text}</span>
+                    </div>
+                  );
+                }
+                return entry.html ? (
+                  <div
                     key={entry.id}
+                    ref={entry.tone === "tutor" ? tutorOutputRef : undefined}
                     className={cn(
                       entry.tone === "info" && "text-slate-700",
                       entry.tone === "success" && "text-emerald-700",
                       entry.tone === "error" && "text-rose-700",
                       entry.tone === "answer" && "text-amber-600",
+                      entry.tone === "tutor" && "rounded-md border border-purple-500 bg-purple-50/50 p-3 text-slate-700",
                     )}
                     // eslint-disable-next-line react/no-danger
                     dangerouslySetInnerHTML={{ __html: entry.html }}
@@ -571,8 +595,8 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
                   >
                     {entry.text}
                   </p>
-                ),
-              )}
+                );
+              })}
             </div>
           </form>
         </section>
