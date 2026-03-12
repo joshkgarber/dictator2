@@ -44,6 +44,7 @@ p{takeaway}
 
 ### Needs Refinement
 
+- [ ] Exponential retry and backoff logic for tutor responses
 - [ ] Change "Attempt Input" label to something else (maybe nothing).
 - [ ] Deal with the overflow of main (the background radial gradient cuts off and I would prefer interior scroll areas for the windows within the base views).
 
