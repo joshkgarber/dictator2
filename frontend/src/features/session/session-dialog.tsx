@@ -67,10 +67,6 @@ function toReservedCommand(value: string): SessionCommand | null {
 
 // Format structured tutor corrections into sanitized HTML
 async function formatTutorCorrections(corrections: Correction[]): Promise<string> {
-  if (corrections.length === 0) {
-    return "<p>No corrections needed - great job!</p>";
-  }
-
   const parts: string[] = [];
   for (const correction of corrections) {
     // Escape HTML entities in each field, then parse markdown
