@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 
 from flask import current_app, g, jsonify, request
+from pydantic import BaseModel
 
 try:
     from openai import OpenAI
@@ -13,6 +14,15 @@ from ..auth import error_response, require_auth
 from ..db import get_db
 
 logger = logging.getLogger(__name__)
+
+# Pydantic models for structured tutor output
+class Correction(BaseModel):
+    error: str
+    explanation: str
+    takeaway: str
+
+class Corrections(BaseModel):
+    corrections: list[Correction]
 
 COMMAND_TYPES = {"replay", "keep", "diff", "tutor", "answer", "help", "exit"}
 SESSION_STATUSES = {"in_progress", "completed", "incomplete", "abandoned"}
@@ -229,7 +239,7 @@ def _load_tutor_feedback_history(session_id: int, *, limit: int = 10) -> list[di
     db = get_db()
     rows = db.execute(
         """
-        SELECT id, clip_index, attempt_text, line_text, model_name, response_text, created_at
+        SELECT id, clip_index, attempt_text, line_text, model_name, response_data, created_at
         FROM tutor_feedback
         WHERE session_id = ?
         ORDER BY id DESC
@@ -238,18 +248,26 @@ def _load_tutor_feedback_history(session_id: int, *, limit: int = 10) -> list[di
         (session_id, limit),
     ).fetchall()
 
-    return [
-        {
+    result = []
+    for row in rows:
+        # Parse the JSON response_data
+        response_data = row["response_data"]
+        try:
+            corrections = json.loads(response_data) if response_data else {"corrections": []}
+        except json.JSONDecodeError:
+            corrections = {"corrections": []}
+
+        result.append({
             "id": int(row["id"]),
             "clipIndex": int(row["clip_index"]),
             "attemptText": row["attempt_text"],
             "lineText": row["line_text"],
             "modelName": row["model_name"],
-            "responseText": row["response_text"],
+            "corrections": corrections.get("corrections", []),
             "createdAt": row["created_at"],
-        }
-        for row in rows
-    ]
+        })
+
+    return result
 
 
 def _latest_attempt_for_position(session_id: int, *, clip_index: int, rep_index: int):
@@ -292,7 +310,7 @@ def _text_body_from_lines(text_id: int) -> str:
     return "\n".join(str(row["line_text"]) for row in rows if row["line_text"])
 
 
-def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str) -> tuple[str, str]:
+def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str) -> tuple[Corrections, str]:
     api_key = (current_app.config.get("OPENAI_API_KEY") or "").strip()
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not configured")
@@ -304,31 +322,27 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str)
         model_name = "gpt-4o-mini"
 
     client = OpenAI(api_key=api_key)
-    response = client.responses.create(
+    response = client.responses.parse(
         model=model_name,
         input=[
             {
                 "role": "developer",
                 "content": (
-                    "You are a concise German language tutor. Compare the user's attempt with the correct answer and provide brief, targeted feedback.\n\n"
-                    "Structure your response. For each error committed by the user:\n"
-                    "1. Identify the specific error (1 sentence)\n"
-                    "2. Explain the grammatical rule/concept briefly (2-3 sentences)\n"
-                    "3. Provide a key takeaway for future attempts (1 sentence)\n\n"
-                    "Keep your total response under 100 words. Focus ONLY on the specific errors made."
+                    "You are a concise German language tutor. Compare the user's attempt with the correct answer and provide brief, targeted feedback."
                 ),
             },
             {"role": "user", "content": f"This is the text I am currently studying: {text_body}"},
             {"role": "user", "content": f"This is the line which I got wrong: {line_text}"},
             {"role": "user", "content": f"My attempt to write the line from memory was: {attempt_text}"},
         ],
+        text_format=Corrections,
     )
 
-    output_text = getattr(response, "output_text", "")
-    if not isinstance(output_text, str) or not output_text.strip():
-        raise RuntimeError("Tutor response was empty")
+    output_parsed = getattr(response, "output_parsed", None)
+    if not isinstance(output_parsed, Corrections):
+        raise RuntimeError("Tutor response was not in expected structured format")
 
-    return output_text.strip(), model_name
+    return output_parsed, model_name
 
 
 def _correct_attempt_count(session_id: int) -> int:
@@ -1009,7 +1023,7 @@ def create_tutor_feedback(session_id: int):
         return error_response("INTERNAL_ERROR", "Could not build text body for tutor", 500)
 
     try:
-        response_text, model_name = _openai_tutor_response(
+        corrections, model_name = _openai_tutor_response(
             text_body=text_body,
             line_text=expected_line["text"],
             attempt_text=attempt_text,
@@ -1017,6 +1031,9 @@ def create_tutor_feedback(session_id: int):
     except Exception as error:  # pragma: no cover
         logger.exception("tutor_feedback_failed session_id=%s clip_index=%s", session_id, clip_index)
         return error_response("TUTOR_UNAVAILABLE", f"Tutor feedback is temporarily unavailable: {error}", 503)
+
+    # Serialize Corrections to JSON for storage
+    response_data = corrections.model_dump_json()
 
     db = get_db()
     insert_cursor = db.execute(
@@ -1027,11 +1044,11 @@ def create_tutor_feedback(session_id: int):
           attempt_text,
           line_text,
           model_name,
-          response_text
+          response_data
         )
         VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (session_id, clip_index, attempt_text, expected_line["text"], model_name, response_text),
+        (session_id, clip_index, attempt_text, expected_line["text"], model_name, response_data),
     )
     db.commit()
 
@@ -1047,7 +1064,7 @@ def create_tutor_feedback(session_id: int):
                 "attemptText": attempt_text,
                 "lineText": expected_line["text"],
                 "modelName": model_name,
-                "responseText": response_text,
+                "corrections": corrections.model_dump()["corrections"],
             },
             "history": _load_tutor_feedback_history(session_id),
         }

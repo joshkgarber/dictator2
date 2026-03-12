@@ -96,7 +96,7 @@ describe("SessionDialog typed command handling", () => {
       attemptText: "bad",
       lineText: "eins",
       modelName: "mock",
-      responseText: "Try again",
+      corrections: [{ error: "Test error", explanation: "Test explanation", takeaway: "Test takeaway" }],
     });
     vi.mocked(completeSession).mockResolvedValue(buildSession({ status: "completed" }));
     vi.mocked(exitSession).mockResolvedValue(buildSession({ status: "incomplete" }));

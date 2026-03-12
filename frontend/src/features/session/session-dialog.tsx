@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import DOMPurify from "dompurify";
+import { encode } from "html-entities";
 import { marked } from "marked";
 import { LoaderCircle, Volume2 } from "lucide-react";
 
@@ -12,6 +13,7 @@ import {
   SESSION_COMMANDS,
   type SessionCommand,
   type SessionState,
+  type Correction,
   completeSession,
   exitSession,
   fetchSessionDiff,
@@ -61,6 +63,39 @@ function toReservedCommand(value: string): SessionCommand | null {
     return null;
   }
   return value as SessionCommand;
+}
+
+// Format structured tutor corrections into sanitized HTML
+async function formatTutorCorrections(corrections: Correction[]): Promise<string> {
+  if (corrections.length === 0) {
+    return "<p>No corrections needed - great job!</p>";
+  }
+
+  const parts: string[] = [];
+  for (const correction of corrections) {
+    // Escape HTML entities in each field, then parse markdown
+    const escapedError = encode(correction.error);
+    const escapedExplanation = encode(correction.explanation);
+    const escapedTakeaway = encode(correction.takeaway);
+
+    const errorHtml = await marked.parse(escapedError);
+    const explanationHtml = await marked.parse(escapedExplanation);
+    const takeawayHtml = await marked.parse(escapedTakeaway);
+
+    parts.push(`
+      <div class="tutor-correction mb-4 p-3 border-l-4 border-blue-500 bg-slate-50 rounded">
+        <div class="tutor-error font-semibold text-red-700 mb-2">${errorHtml}</div>
+        <div class="tutor-explanation text-slate-700 mb-2">${explanationHtml}</div>
+        <div class="tutor-takeaway text-green-700 font-medium">${takeawayHtml}</div>
+      </div>
+    `);
+  }
+
+  const rawHtml = parts.join("");
+  return DOMPurify.sanitize(rawHtml, {
+    ALLOWED_TAGS: ["p", "br", "strong", "em", "ul", "ol", "li", "code", "pre", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "a", "div"],
+    ALLOWED_ATTR: ["class"],
+  });
 }
 
 export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: SessionDialogProps) {
@@ -344,12 +379,9 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         setIsSubmitting(true);
         try {
           const feedback = await fetchSessionTutorFeedback(activeSession.id);
-          const html = await marked.parse(feedback.responseText);
-          const sanitized = DOMPurify.sanitize(html, {
-            ALLOWED_TAGS: ["p", "br", "strong", "em", "ul", "ol", "li", "code", "pre", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "a"],
-          });
+          const formattedHtml = await formatTutorCorrections(feedback.corrections);
           updateConsoleEntry(placeholderId, { tone: "info", text: "Tutor responded" });
-          appendConsole("tutor", `${feedback.responseText}`, sanitized);
+          appendConsole("tutor", "", formattedHtml);
           setTimeout(() => {
             tutorOutputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
           }, 100);

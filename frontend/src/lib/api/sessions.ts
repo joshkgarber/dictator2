@@ -113,13 +113,19 @@ type CreateDiffResponse = {
   diff: SessionDiff;
 };
 
+export type Correction = {
+  error: string;
+  explanation: string;
+  takeaway: string;
+};
+
 export type TutorFeedback = {
   id: number;
   clipIndex: number;
   attemptText: string;
   lineText: string;
   modelName: string | null;
-  responseText: string;
+  corrections: Correction[];
 };
 
 export type SessionHistoryRecord = {
