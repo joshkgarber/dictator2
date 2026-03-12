@@ -1,9 +1,8 @@
--- Migration: Update tutor_feedback table to support structured JSON responses
--- Replaces response_text TEXT column with response_data JSON column
+-- Migration: Rename response_text column to respose_json for structured JSON responses
 
 -- Since SQLite doesn't support ALTER COLUMN, we need to:
 -- 1. Create a new table with the updated schema
--- 2. Copy data (though no data preservation needed per requirements)
+-- 2. Copy data (converting response_text to JSON format)
 -- 3. Drop old table
 -- 4. Rename new table
 
@@ -14,14 +13,13 @@ CREATE TABLE tutor_feedback_new (
     attempt_text TEXT NOT NULL,
     line_text TEXT NOT NULL,
     model_name TEXT,
-    response_data TEXT NOT NULL,  -- JSON column for structured tutor feedback
+    respose_json TEXT NOT NULL,  -- Renamed from response_text for structured JSON
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
 );
 
--- Copy existing data (response_text will be lost, per requirements no data preservation needed)
--- Insert placeholder JSON for existing records
-INSERT INTO tutor_feedback_new (id, session_id, clip_index, attempt_text, line_text, model_name, response_data, created_at)
+-- Copy existing data (convert response_text to JSON format)
+INSERT INTO tutor_feedback_new (id, session_id, clip_index, attempt_text, line_text, model_name, respose_json, created_at)
 SELECT 
     id,
     session_id,
