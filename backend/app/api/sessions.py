@@ -239,7 +239,7 @@ def _load_tutor_feedback_history(session_id: int, *, limit: int = 10) -> list[di
     db = get_db()
     rows = db.execute(
         """
-        SELECT id, clip_index, attempt_text, line_text, model_name, response_data, created_at
+        SELECT id, clip_index, attempt_text, line_text, model_name, response_json, created_at
         FROM tutor_feedback
         WHERE session_id = ?
         ORDER BY id DESC
@@ -250,10 +250,10 @@ def _load_tutor_feedback_history(session_id: int, *, limit: int = 10) -> list[di
 
     result = []
     for row in rows:
-        # Parse the JSON response_data
-        response_data = row["response_data"]
+        # Parse the JSON response_json
+        response_json = row["response_json"]
         try:
-            corrections = json.loads(response_data) if response_data else {"corrections": []}
+            corrections = json.loads(response_json) if response_json else {"corrections": []}
         except json.JSONDecodeError:
             corrections = {"corrections": []}
 
@@ -1033,7 +1033,7 @@ def create_tutor_feedback(session_id: int):
         return error_response("TUTOR_UNAVAILABLE", f"Tutor feedback is temporarily unavailable: {error}", 503)
 
     # Serialize Corrections to JSON for storage
-    response_data = corrections.model_dump_json()
+    response_json = corrections.model_dump_json()
 
     db = get_db()
     insert_cursor = db.execute(
@@ -1044,11 +1044,11 @@ def create_tutor_feedback(session_id: int):
           attempt_text,
           line_text,
           model_name,
-          response_data
+          response_json
         )
         VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (session_id, clip_index, attempt_text, expected_line["text"], model_name, response_data),
+        (session_id, clip_index, attempt_text, expected_line["text"], model_name, response_json),
     )
     db.commit()
 
