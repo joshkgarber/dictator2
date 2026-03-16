@@ -44,9 +44,7 @@ def _parse_clip_index(filename: str) -> int | None:
 
 def _has_mp3_signature(file_storage) -> bool:
     stream = file_storage.stream
-    position = stream.tell()
     header = stream.read(10)
-    stream.seek(position)
 
     if len(header) < 2:
         return False
