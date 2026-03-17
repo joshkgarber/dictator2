@@ -4,8 +4,6 @@
 
 ### Ready
 
-- [ ] Tutor command: Implement exponential retry and backoff logic for tutor responses
-- [ ] Clips upload bug: Sometimes a CRLF sequence is being prepended to clip buffers somewhere along the way from frontend upload to backend processing. This results in a "invalid mp3" error. Occurs with pre-checked files so the issue is somewhere in the app (either front end or backend), not the file.
 
 ### Needs Refinement
 
