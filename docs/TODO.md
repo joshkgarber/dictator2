@@ -4,17 +4,18 @@
 
 ### Ready
 
-- [ ] Tutor combines two errors into one correction. Be more detailed in the prompt that each error that the user makes needs its own correction.
-- [ ] Implement exponential retry and backoff logic for tutor responses
-- [ ] The "Due Today" label in the schedule view should be green not yellow.
-- [ ] Session dialog: There should not be a replay button in the top right. It just needs to be removed. So the header element will contain the elements which are currently in its first child div. maintain the existing flexbox settings so that the content is spread across the top (text name — clip number — score).
+- [ ] Tutor command: The AI regularly combines two errors into one correction. Be more detailed in the prompt that each error that the user makes needs its own correction.
+- [ ] Tutor command: Implement exponential retry and backoff logic for tutor responses
+- [ ] Schedule view: The "Due Today" label should be green not yellow.
+- [ ] Schedule view: it says "Plan and launch your next sessions". It should say "View your schedule and launch your next session".
+- [ ] Session dialog: There should not be a replay button in the top right. It just needs to be removed. So the header element will contain the elements which are currently in its first child div. Maintain the existing flexbox settings so that the content is spread across the top (text name — clip number — score).
 - [ ] Session dialog: Remove the "Attempt Input" label.
+- [ ] Clips upload bug: Sometimes a CRLF sequence is being prepended to clip buffers somewhere along the way from frontend upload to backend processing. This results in a "invalid mp3" error. Occurs with pre-checked files so the issue is somewhere in the app (either front end or backend), not the file.
 
 ### Needs Refinement
 
 - [ ] Right-click on the text name in schedule view to schedule today.
 - [ ] Check the next launch target calculation. It should be older texts first.
-- [ ] On the schedule view, it says plan and launch your next sessions. It should say view your schedule and launch your next session.
 - [ ] The calendar panel on the schedule view is too narrow, it needs to be wider so that there's no overflow of the session indicator pills within the day boxes.
 - [ ] You can appeal wrong answers if you think it's due to a stylistic capitalization.
 - [ ] wrong answers should have lower points than using any command. so showdiff, replay, etc should all be at least 2 points. This is because trying again didn't use any help, only self memory.
@@ -23,7 +24,6 @@
 - [ ] Bug: validation error for audio clips not being shown to user when creating a text
     - to reproduce, try to upload invalid clip(s)
     - actually it's showing on the main view instead of in the dialog.
-- [ ] Investigate CRLF being prepended to clip buffers somewhere along the way from frontend upload to backend processing.
 
 ## P1
 
