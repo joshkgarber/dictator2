@@ -328,7 +328,7 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str)
             {
                 "role": "developer",
                 "content": (
-                    "You are a concise German language tutor. Compare the user's attempt with the correct answer and provide brief, targeted feedback."
+                    "You are a German language tutor. Compare the user's attempt with the correct answer. For EACH error the user makes, provide a separate, individual correction. Do not combine multiple errors into a single correction response. Each distinct mistake should have its own targeted feedback item. Be brief and to-the-point as the user will read this during their session before moving on to the next challenge."
                 ),
             },
             {"role": "user", "content": f"This is the text I am currently studying: {text_body}"},
