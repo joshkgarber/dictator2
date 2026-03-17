@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import DOMPurify from "dompurify";
 import { encode } from "html-entities";
 import { marked } from "marked";
+import { LoaderCircle } from "lucide-react";
 
 import { FormField } from "@/components/shared/form-primitives";
 import { Button } from "@/components/ui/button";
