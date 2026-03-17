@@ -4,12 +4,7 @@
 
 ### Ready
 
-- [ ] Tutor command: The AI regularly combines two errors into one correction. Be more detailed in the prompt that each error that the user makes needs its own correction.
 - [ ] Tutor command: Implement exponential retry and backoff logic for tutor responses
-- [ ] Schedule view: The "Due Today" label should be green not yellow.
-- [ ] Schedule view: it says "Plan and launch your next sessions". It should say "View your schedule and launch your next session".
-- [ ] Session dialog: There should not be a replay button in the top right. It just needs to be removed. So the header element will contain the elements which are currently in its first child div. Maintain the existing flexbox settings so that the content is spread across the top (text name — clip number — score).
-- [ ] Session dialog: Remove the "Attempt Input" label.
 - [ ] Clips upload bug: Sometimes a CRLF sequence is being prepended to clip buffers somewhere along the way from frontend upload to backend processing. This results in a "invalid mp3" error. Occurs with pre-checked files so the issue is somewhere in the app (either front end or backend), not the file.
 
 ### Needs Refinement
