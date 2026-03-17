@@ -15,7 +15,7 @@
 ### Needs Refinement
 
 - [ ] Right-click on the text name in schedule view to schedule today.
-- [ ] Check the next launch target calculation. It should be older texts first.
+- [ ] Check the next launch target calculation. It should be older texts first. Atually I think the launch order might be right but they are not being shown in the same order in which they will be launched.
 - [ ] The calendar panel on the schedule view is too narrow, it needs to be wider so that there's no overflow of the session indicator pills within the day boxes.
 - [ ] You can appeal wrong answers if you think it's due to a stylistic capitalization.
 - [ ] wrong answers should have lower points than using any command. so showdiff, replay, etc should all be at least 2 points. This is because trying again didn't use any help, only self memory.
