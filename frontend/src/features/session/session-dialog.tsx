@@ -523,7 +523,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           </header>
 
           <form onSubmit={onSubmit} className="space-y-3">
-            <FormField label="Attempt Input" htmlFor="attempt-input">
+            <FormField htmlFor="attempt-input">
               <input
                 id="attempt-input"
                 ref={inputRef}
