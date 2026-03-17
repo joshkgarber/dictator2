@@ -302,7 +302,7 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
                               className={cn(
                                 "inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold",
                                 row.bucket === "Overdue" && "border-rose-200 bg-rose-50 text-rose-700",
-                                row.bucket === "Due Today" && "border-amber-200 bg-amber-50 text-amber-700",
+                                row.bucket === "Due Today" && "border-emerald-200 bg-emerald-50 text-emerald-700",
                                 row.bucket === "Upcoming" && "border-slate-300 bg-slate-100 text-slate-700",
                               )}
                             >
