@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from datetime import datetime
 
 from flask import current_app, g, jsonify, request
@@ -322,27 +323,58 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str)
         model_name = "gpt-4o-mini"
 
     client = OpenAI(api_key=api_key)
-    response = client.responses.parse(
-        model=model_name,
-        input=[
-            {
-                "role": "developer",
-                "content": (
-                    "You are a German language tutor. Compare the user's attempt with the correct answer. For EACH error the user makes, provide a separate, individual correction. Do not combine multiple errors into a single correction response. Each distinct mistake should have its own targeted feedback item. Be brief and to-the-point as the user will read this during their session before moving on to the next challenge."
-                ),
-            },
-            {"role": "user", "content": f"This is the text I am currently studying: {text_body}"},
-            {"role": "user", "content": f"This is the line which I got wrong: {line_text}"},
-            {"role": "user", "content": f"My attempt to write the line from memory was: {attempt_text}"},
-        ],
-        text_format=Corrections,
-    )
 
-    output_parsed = getattr(response, "output_parsed", None)
-    if not isinstance(output_parsed, Corrections):
-        raise RuntimeError("Tutor response was not in expected structured format")
+    max_retries = 5
+    delay = 15  # seconds
 
-    return output_parsed, model_name
+    for attempt in range(max_retries):
+        try:
+            response = client.responses.parse(
+                model=model_name,
+                input=[
+                    {
+                        "role": "developer",
+                        "content": (
+                            "You are a German language tutor. Compare the user's attempt with the correct answer. "
+                            "For EACH error the user makes, provide a separate, individual correction. "
+                            "Do not combine multiple errors into a single correction response."
+                        ),
+                    },
+                    {"role": "user", "content": f"This is the text I am currently studying: {text_body}"},
+                    {"role": "user", "content": f"This is the line which I got wrong: {line_text}"},
+                    {"role": "user", "content": f"My attempt to write the line from memory was: {attempt_text}"},
+                ],
+                text_format=Corrections,
+            )
+
+            output_parsed = getattr(response, "output_parsed", None)
+            if not isinstance(output_parsed, Corrections):
+                raise RuntimeError("Tutor response was not in expected structured format")
+
+            return output_parsed, model_name
+
+        except Exception as e:
+            error_code = getattr(e, 'code', None)
+
+            # Only retry on rate limit (429) or server errors (>= 500)
+            if error_code == 429 or (isinstance(error_code, int) and error_code >= 500):
+                if attempt < max_retries - 1:
+                    logger.warning("Tutor API error %s on attempt %d/%d, retrying in %ds...", 
+                                   error_code, attempt + 1, max_retries, delay)
+                    time.sleep(delay)
+                    delay *= 2  # Exponential backoff
+                    continue
+                else:
+                    # Max retries exceeded
+                    logger.error("Tutor API failed after %d retries: %s", max_retries, e)
+                    raise RuntimeError(f"Tutor feedback is temporarily unavailable: {e}")
+            else:
+                # Unrecoverable error (client errors, auth errors, etc.)
+                logger.exception("Tutor API unrecoverable error: %s", e)
+                raise RuntimeError(f"An unrecoverable error has occurred: {e}")
+
+    # This line is unreachable but satisfies type checker
+    raise RuntimeError("Unexpected end of retry loop")
 
 
 def _correct_attempt_count(session_id: int) -> int:
