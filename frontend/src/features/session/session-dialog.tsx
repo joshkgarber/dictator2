@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import DOMPurify from "dompurify";
 import { encode } from "html-entities";
 import { marked } from "marked";
-import { LoaderCircle, Volume2 } from "lucide-react";
 
 import { FormField } from "@/components/shared/form-primitives";
 import { Button } from "@/components/ui/button";
@@ -515,36 +514,11 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       <div className={cn("grid gap-3", isInstructionsOpen ? "md:grid-cols-[1.3fr_1fr]" : "grid-cols-1")}>
         <section className="space-y-3 rounded-lg border border-slate-300 bg-slate-50 p-3">
           <header className="flex items-center justify-between gap-3">
-            <div className="grid gap-0.5 sm:grid-cols-3 sm:gap-4">
-              <p className="text-sm font-semibold text-slate-900">{session?.textName || candidate?.textName || "Session"}</p>
-              <p className="text-sm text-slate-700">
-                Clip {session?.current.clipIndex || 0}/{session?.totalClips || 0}
-              </p>
-              <p className="text-sm text-slate-700">Score: {session?.rawScore ?? 0}</p>
-            </div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-100 disabled:opacity-60"
-              onClick={() => {
-                if (!session) {
-                  return;
-                }
-                setIsSubmitting(true);
-                void runCommand("replay", session)
-                  .catch((error: unknown) => {
-                    appendConsole("error", getApiErrorMessage(error));
-                  })
-                  .finally(() => {
-                    if (mountedRef.current) {
-                      setIsSubmitting(false);
-                    }
-                  });
-              }}
-              disabled={isBusy || !session || session.status !== "in_progress"}
-            >
-              {isBusy ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <Volume2 className="h-3.5 w-3.5" />}
-              Replay Clip
-            </button>
+            <p className="text-sm font-semibold text-slate-900">{session?.textName || candidate?.textName || "Session"}</p>
+            <p className="text-sm text-slate-700">
+              Clip {session?.current.clipIndex || 0}/{session?.totalClips || 0}
+            </p>
+            <p className="text-sm text-slate-700">Score: {session?.rawScore ?? 0}</p>
           </header>
 
           <form onSubmit={onSubmit} className="space-y-3">
