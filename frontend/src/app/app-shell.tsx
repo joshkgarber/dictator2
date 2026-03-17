@@ -45,7 +45,7 @@ export function AppShell() {
 
   const shellHeadline = useMemo(() => {
     if (activeTab === "schedule") {
-      return "Plan and launch your next dictation sessions.";
+      return "View your schedule and launch your next session.";
     }
     if (activeTab === "texts") {
       return "Manage source texts, clips, and readiness state.";
