@@ -350,7 +350,7 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str,
                             "Do not combine multiple errors into a single correction response. "
                             "Focus ONLY on word-level errors identified in the diff analysis. "
                             "Do not comment on first-word capitalization or minor punctuation differences, as these are acceptable."
-                            f"{diff_context}"
+                            f"Follow the guidance of this statement to identify the particular errors being addressed in your response: {diff_context}"
                         ),
                     },
                     {"role": "user", "content": f"This is the text I am currently studying: {text_body}"},
