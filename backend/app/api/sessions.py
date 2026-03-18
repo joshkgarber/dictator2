@@ -311,7 +311,7 @@ def _text_body_from_lines(text_id: int) -> str:
     return "\n".join(str(row["line_text"]) for row in rows if row["line_text"])
 
 
-def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str) -> tuple[Corrections, str]:
+def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str, diff: dict | None = None) -> tuple[Corrections, str]:
     api_key = (current_app.config.get("OPENAI_API_KEY") or "").strip()
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not configured")
@@ -327,6 +327,19 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str)
     max_retries = 5
     delay = 15  # seconds
 
+    # Build diff context for the tutor
+    diff_context = ""
+    if diff:
+        if diff.get("mode") == "word_match":
+            words = diff.get("words", [])
+            error_indices = [i for i, w in enumerate(words) if not w.get("isMatch", True)]
+            if error_indices:
+                diff_context = f"\n\nWord-level analysis (ONLY focus feedback on these error positions): {error_indices}\nNote: First-word capitalization differences and minor punctuation are NOT considered errors."
+            else:
+                diff_context = "\n\nNote: No significant word-level errors detected. The attempt matches the expected answer (case-insensitive)."
+        elif diff.get("mode") == "word_count_mismatch":
+            diff_context = f"\n\nWord count mismatch: {diff.get('message', 'Different number of words.')}\nFocus feedback on missing or extra words."
+
     for attempt in range(max_retries):
         try:
             response = client.responses.parse(
@@ -337,7 +350,10 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str)
                         "content": (
                             "You are a German language tutor. Compare the user's attempt with the correct answer. "
                             "For EACH error the user makes, provide a separate, individual correction. "
-                            "Do not combine multiple errors into a single correction response."
+                            "Do not combine multiple errors into a single correction response. "
+                            "Focus ONLY on word-level errors identified in the diff analysis. "
+                            "Do not comment on first-word capitalization or minor punctuation differences, as these are acceptable."
+                            f"{diff_context}"
                         ),
                     },
                     {"role": "user", "content": f"This is the text I am currently studying: {text_body}"},
@@ -1054,11 +1070,15 @@ def create_tutor_feedback(session_id: int):
     if not text_body:
         return error_response("INTERNAL_ERROR", "Could not build text body for tutor", 500)
 
+    # Calculate diff to inform tutor which errors actually matter
+    diff = _diff_payload(clip_index=clip_index, expected=expected_line["text"], attempt=attempt_text)
+
     try:
         corrections, model_name = _openai_tutor_response(
             text_body=text_body,
             line_text=expected_line["text"],
             attempt_text=attempt_text,
+            diff=diff,
         )
     except Exception as error:  # pragma: no cover
         logger.exception("tutor_feedback_failed session_id=%s clip_index=%s", session_id, clip_index)
