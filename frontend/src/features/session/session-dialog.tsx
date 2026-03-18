@@ -515,7 +515,6 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       <div className={cn("grid gap-3", isInstructionsOpen ? "md:grid-cols-[1.3fr_1fr]" : "grid-cols-1")}>
         <section className="space-y-3 rounded-lg border border-slate-300 bg-slate-50 p-3">
           <header className="flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-slate-900">{session?.textName || candidate?.textName || "Session"}</p>
             <p className="text-sm text-slate-700">
               Clip {session?.current.clipIndex || 0}/{session?.totalClips || 0}
             </p>
