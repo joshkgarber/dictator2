@@ -558,7 +558,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
 
             <div
               ref={consoleRef}
-              className="h-[280px] overflow-y-auto rounded-md border border-slate-300 bg-white p-3 text-sm leading-6"
+              className="flex flex-col gap-y-2 h-[280px] overflow-y-auto rounded-md border border-slate-300 bg-white p-3 text-sm leading-6"
             >
               {consoleEntries.length === 0 && <p className="text-slate-500">Session output will appear here.</p>}
               {consoleEntries.map((entry) => {
