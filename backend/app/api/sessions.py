@@ -348,7 +348,6 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str,
                             "You are a German language tutor. Compare the user's attempt with the correct answer. "
                             "For EACH error the user makes, provide a separate, individual correction. "
                             "Do not combine multiple errors into a single correction response. "
-                            "Focus ONLY on word-level errors identified in the diff analysis. "
                             "Do not comment on first-word capitalization or minor punctuation differences, as these are acceptable."
                             f"Follow the guidance of this statement to identify the particular errors being addressed in your response: {diff_context}"
                         ),
