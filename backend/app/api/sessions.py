@@ -333,10 +333,7 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str,
         if diff.get("mode") == "word_match":
             words = diff.get("words", [])
             error_indices = [i for i, w in enumerate(words) if not w.get("isMatch", True)]
-            if error_indices:
-                diff_context = f"\n\nWord-level analysis (ONLY focus feedback on these error positions): {error_indices}\nNote: First-word capitalization differences and minor punctuation are NOT considered errors."
-            else:
-                diff_context = "\n\nNote: No significant word-level errors detected. The attempt matches the expected answer (case-insensitive)."
+            diff_context = f"\n\nWord-level analysis (ONLY focus feedback on these error positions): {error_indices}"
         elif diff.get("mode") == "word_count_mismatch":
             diff_context = f"\n\nWord count mismatch: {diff.get('message', 'Different number of words.')}\nFocus feedback on missing or extra words."
 
