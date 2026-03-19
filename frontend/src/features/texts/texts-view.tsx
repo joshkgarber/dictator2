@@ -209,6 +209,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
   const [sortField, setSortField] = useState<SortField>("updatedAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [readinessDetails, setReadinessDetails] = useState<Record<number, TextReadiness>>({});
+  const [dialogError, setDialogError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -326,6 +327,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
               className="rounded-md border border-slate-300 p-1.5 text-slate-700 hover:bg-slate-100"
               onClick={() => {
                 setSelectedTextId(row.id);
+                setDialogError(null);
                 setMode("edit");
               }}
             >
@@ -351,6 +353,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
   async function upsertText(payload: TextFormSubmitPayload) {
     setIsSaving(true);
     setErrorMessage(null);
+    setDialogError(null);
 
     try {
       if (mode === "new") {
@@ -368,15 +371,23 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
 
         let nextText = created;
         if (payload.clips.length > 0) {
-          await uploadTextClips(created.id, payload.clips);
-          const readiness = await validateTextReadiness(created.id);
-          setReadinessDetails((prev) => ({ ...prev, [created.id]: readiness }));
-          nextText = {
-            ...nextText,
-            lineCount: readiness.lineCount,
-            clipCount: readiness.clipCount,
-            isReady: readiness.isReady,
-          };
+          try {
+            await uploadTextClips(created.id, payload.clips);
+            const readiness = await validateTextReadiness(created.id);
+            setReadinessDetails((prev) => ({ ...prev, [created.id]: readiness }));
+            nextText = {
+              ...nextText,
+              lineCount: readiness.lineCount,
+              clipCount: readiness.clipCount,
+              isReady: readiness.isReady,
+            };
+          } catch (clipError) {
+            // On clip upload failure, delete the created text to avoid orphaned records
+            await deleteText(created.id);
+            setDialogError(getErrorMessage(clipError));
+            setIsSaving(false);
+            return;
+          }
         }
 
         setTexts((prev) => [...prev, nextText]);
@@ -396,8 +407,14 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
         }
 
         if (payload.clips.length > 0) {
-          await uploadTextClips(selectedText.id, payload.clips);
-          changed = true;
+          try {
+            await uploadTextClips(selectedText.id, payload.clips);
+            changed = true;
+          } catch (clipError) {
+            setDialogError(getErrorMessage(clipError));
+            setIsSaving(false);
+            return;
+          }
         }
 
         await upsertTextSchedule(selectedText.id, payload.scheduledDate);
@@ -413,6 +430,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
 
       setMode(null);
       setSelectedTextId(null);
+      setDialogError(null);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {
@@ -498,6 +516,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
           <Button
             onClick={() => {
               setSelectedTextId(null);
+              setDialogError(null);
               setMode("new");
             }}
           >
@@ -530,15 +549,18 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
         mode={mode}
         text={selectedText}
         isSubmitting={isSaving}
+        externalError={dialogError}
         onClose={() => {
           if (isSaving) {
             return;
           }
           setMode(null);
+          setDialogError(null);
         }}
         onSubmit={(payload) => {
           void upsertText(payload);
         }}
+        onClearExternalError={() => setDialogError(null)}
       />
 
       <DeleteTextDialog
@@ -564,11 +586,13 @@ type TextFormDialogProps = {
   mode: DialogMode;
   text: TextRecord | null;
   isSubmitting: boolean;
+  externalError: string | null;
   onClose: () => void;
   onSubmit: (payload: TextFormSubmitPayload) => void;
+  onClearExternalError: () => void;
 };
 
-function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: TextFormDialogProps) {
+function TextFormDialog({ open, mode, text, isSubmitting, externalError, onClose, onSubmit, onClearExternalError }: TextFormDialogProps) {
   const [name, setName] = useState(text?.name || "");
   const [level, setLevel] = useState<TextLevel>(text?.level || "B1");
   const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
@@ -702,7 +726,11 @@ function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: T
       }
     >
       <form id="text-form" className="space-y-3" onSubmit={submitForm} noValidate>
-        {localError && <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{localError}</p>}
+        {(localError || externalError) && (
+          <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            {localError || externalError}
+          </p>
+        )}
 
         <FormSection title="Metadata" description="Set core text identity before validating transcript and clips.">
           <FormField label="Name" htmlFor="text-name">
@@ -786,6 +814,7 @@ function TextFormDialog({ open, mode, text, isSubmitting, onClose, onSubmit }: T
               className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
               onChange={(event) => {
                 setClips(Array.from(event.target.files || []));
+                onClearExternalError();
               }}
               {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
             />
