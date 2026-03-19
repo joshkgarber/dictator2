@@ -382,8 +382,10 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
               isReady: readiness.isReady,
             };
           } catch (clipError) {
-            // On clip upload failure, delete the created text to avoid orphaned records
-            await deleteText(created.id);
+            // On clip upload failure, switch to edit mode so user can retry with different clips
+            setTexts((prev) => [...prev, created]);
+            setSelectedTextId(created.id);
+            setMode("edit");
             setDialogError(getErrorMessage(clipError));
             setIsSaving(false);
             return;
