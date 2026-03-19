@@ -383,7 +383,17 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
             };
           } catch (clipError) {
             // On clip upload failure, switch to edit mode so user can retry with different clips
-            setTexts((prev) => [...prev, created]);
+            const textWithSchedule = {
+              ...created,
+              schedule: {
+                id: 0, // Placeholder, will be refetched on next load
+                nextSessionDate: payload.scheduledDate,
+                notes: null,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+            };
+            setTexts((prev) => [...prev, textWithSchedule]);
             setSelectedTextId(created.id);
             setMode("edit");
             setDialogError(getErrorMessage(clipError));
