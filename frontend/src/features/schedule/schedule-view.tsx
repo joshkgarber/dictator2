@@ -115,6 +115,27 @@ function getErrorMessage(error: unknown): string {
   return "Failed to load schedule";
 }
 
+function sortScheduleRows(rows: ScheduleRow[], bucket: DueBucket): ScheduleRow[] {
+  return [...rows].sort((a, b) => {
+    if (bucket === "Due Today") {
+      // Due Today: Sort by level ASC, then createdAt ASC
+      if (a.level !== b.level) {
+        return a.level.localeCompare(b.level);
+      }
+      return a.createdAt.localeCompare(b.createdAt);
+    }
+
+    // Overdue and Upcoming: Sort by dueDate ASC, then level ASC, then createdAt ASC
+    if (a.dueDate !== b.dueDate) {
+      return a.dueDate.localeCompare(b.dueDate);
+    }
+    if (a.level !== b.level) {
+      return a.level.localeCompare(b.level);
+    }
+    return a.createdAt.localeCompare(b.createdAt);
+  });
+}
+
 type ScheduleViewProps = {
   onStartNextSession: (candidate: NextSessionCandidate) => void;
 };
@@ -172,30 +193,28 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
       grouped[row.bucket].push(row);
     }
 
+    // Sort each bucket according to wireframe specifications
+    grouped.Overdue = sortScheduleRows(grouped.Overdue, "Overdue");
+    grouped["Due Today"] = sortScheduleRows(grouped["Due Today"], "Due Today");
+    grouped.Upcoming = sortScheduleRows(grouped.Upcoming, "Upcoming");
+
     return grouped;
   }, [rows]);
 
   const nextCandidate = useMemo<NextSessionCandidate | null>(() => {
-    const dueTodayRows = rows.filter((row) => row.bucket === "Due Today");
+    const dueTodayRows = groupedRows["Due Today"];
     if (dueTodayRows.length === 0) {
       return null;
     }
 
-    const sorted = [...dueTodayRows].sort((a, b) => {
-      if (a.level !== b.level) {
-        return a.level.localeCompare(b.level);
-      }
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    });
-
-    const candidate = sorted[0];
+    const candidate = dueTodayRows[0];
     return {
       textId: candidate.textId,
       textName: candidate.textName,
       level: candidate.level,
       dueLabel: candidate.dueLabel,
     };
-  }, [rows]);
+  }, [groupedRows]);
 
   const weekDays = useMemo<CalendarDay[]>(() => {
     const entriesByDate = new Map<string, ScheduleRow[]>();
