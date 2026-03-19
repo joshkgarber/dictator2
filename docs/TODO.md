@@ -4,10 +4,6 @@
 
 ### Needs Refinement
 
-- [ ] Deal with the overflow of main (the background radial gradient cuts off).
-    - The windows within the base views should be scrollable.
-    - The overall view element needs to be larger and I don't like the floating look.
-    - This all needs to be wireframed.
 - [ ] Repetition feature is missing. The keep command should only be available when reps > 0. Otherwise, keep should still be evaluated as a command, but help text in the console output to say keep is not available here.
 - [ ] Option for dark mode and system default
 - [ ] Help text needs a lot of love. including using the help command to toggle the instructions panel. and the up/down arrow history feature.
