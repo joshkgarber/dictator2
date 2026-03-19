@@ -254,7 +254,11 @@ export function TextFormDialog({
       footer={
         <>
           {mode === "edit" && (
-            <Button variant="destructive" onClick={onDelete} disabled={isSubmitting} className="mr-auto">
+            <Button
+              className="mr-auto bg-gray-200 text-white hover:bg-red-500 hover:text-black"
+              onClick={onDelete}
+              disabled={isSubmitting}
+            >
               Delete
             </Button>
           )}
