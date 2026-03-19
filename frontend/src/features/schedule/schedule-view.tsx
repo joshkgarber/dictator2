@@ -1,10 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarCheck2, ChevronLeft, ChevronRight, LoaderCircle, Play } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { fetchSchedule, type ScheduleEntry } from "@/lib/api/schedule";
+import { fetchSchedule, upsertTextSchedule, type ScheduleEntry } from "@/lib/api/schedule";
 import { cn } from "@/lib/utils";
+import {
+  fetchTexts,
+  updateText,
+  updateTextTranscript,
+  uploadTextClips,
+  validateTextReadiness,
+  type TextRecord,
+} from "@/lib/api/texts";
+import {
+  TextFormDialog,
+  type TextFormSubmitPayload,
+  getErrorMessage,
+} from "@/features/texts/text-form-dialog";
 
 export type NextSessionCandidate = {
   textId: number;
@@ -108,13 +121,6 @@ function toScheduleRows(rows: ScheduleEntry[], todayIso: string): ScheduleRow[] 
   }));
 }
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "Failed to load schedule";
-}
-
 function sortScheduleRows(rows: ScheduleRow[], bucket: DueBucket): ScheduleRow[] {
   return [...rows].sort((a, b) => {
     if (bucket === "Due Today") {
@@ -146,11 +152,34 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
   const [rows, setRows] = useState<ScheduleRow[]>([]);
   const [todayIso, setTodayIso] = useState(() => toIsoDate(new Date()));
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+  
+  // Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedText, setSelectedText] = useState<TextRecord | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [dialogError, setDialogError] = useState<string | null>(null);
+
+  const loadSchedule = useCallback(async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetchSchedule();
+      const resolvedToday = response.today || toIsoDate(new Date());
+      setTodayIso(resolvedToday);
+      setRows(toScheduleRows(response.schedule, resolvedToday));
+      setWeekStart(getWeekStart(parseIsoDate(resolvedToday)));
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
 
-    async function loadSchedule() {
+    async function init() {
       setIsLoading(true);
       setErrorMessage(null);
 
@@ -175,12 +204,90 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
       }
     }
 
-    void loadSchedule();
+    void init();
 
     return () => {
       active = false;
     };
   }, []);
+
+  const handleEditClick = useCallback(async (textId: number) => {
+    try {
+      // Fetch the full text record for editing
+      const texts = await fetchTexts();
+      const text = texts.find((t) => t.id === textId);
+      if (text) {
+        setSelectedText(text);
+        setDialogError(null);
+        setDialogOpen(true);
+      } else {
+        setErrorMessage("Text not found");
+      }
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    }
+  }, []);
+
+  const handleDialogClose = useCallback(() => {
+    if (isSaving) {
+      return;
+    }
+    setDialogOpen(false);
+    setSelectedText(null);
+    setDialogError(null);
+  }, [isSaving]);
+
+  const handleTextSubmit = useCallback(async (payload: TextFormSubmitPayload) => {
+    if (!selectedText) {
+      return;
+    }
+
+    setIsSaving(true);
+    setErrorMessage(null);
+    setDialogError(null);
+
+    try {
+      let changed = false;
+
+      if (selectedText.name !== payload.name || selectedText.level !== payload.level) {
+        await updateText(selectedText.id, { name: payload.name, level: payload.level });
+        changed = true;
+      }
+
+      if (payload.transcriptRaw !== null) {
+        await updateTextTranscript(selectedText.id, payload.transcriptRaw);
+        changed = true;
+      }
+
+      if (payload.clips.length > 0) {
+        try {
+          await uploadTextClips(selectedText.id, payload.clips);
+          changed = true;
+        } catch (clipError) {
+          setDialogError(getErrorMessage(clipError));
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      await upsertTextSchedule(selectedText.id, payload.scheduledDate);
+
+      if (changed) {
+        await validateTextReadiness(selectedText.id);
+      }
+
+      // Refresh the schedule to show updated data
+      await loadSchedule();
+
+      setDialogOpen(false);
+      setSelectedText(null);
+      setDialogError(null);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSaving(false);
+    }
+  }, [selectedText, loadSchedule]);
 
   const groupedRows = useMemo(() => {
     const grouped: Record<DueBucket, ScheduleRow[]> = {
@@ -308,7 +415,13 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
                       {groupedRows[bucket].map((row) => (
                         <li key={`${bucket}-${row.id}`} className="flex items-center justify-between gap-3 px-3 py-2.5">
                           <div>
-                            <p className="font-medium text-slate-900">{row.textName}</p>
+                            <button
+                              type="button"
+                              onClick={() => handleEditClick(row.textId)}
+                              className="font-medium text-slate-900 underline decoration-slate-400 underline-offset-2 transition-colors hover:text-blue-600 hover:decoration-blue-400"
+                            >
+                              {row.textName}
+                            </button>
                             <p className="text-xs text-slate-600">Level {row.level}</p>
                             <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500">
                               <CalendarCheck2 className="h-3.5 w-3.5" />
@@ -400,6 +513,17 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
           )}
         </article>
       </div>
+
+      <TextFormDialog
+        open={dialogOpen}
+        mode="edit"
+        text={selectedText}
+        isSubmitting={isSaving}
+        externalError={dialogError}
+        onClose={handleDialogClose}
+        onSubmit={handleTextSubmit}
+        onClearExternalError={() => setDialogError(null)}
+      />
     </section>
   );
 }
