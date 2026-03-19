@@ -382,8 +382,20 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
               isReady: readiness.isReady,
             };
           } catch (clipError) {
-            // On clip upload failure, delete the created text to avoid orphaned records
-            await deleteText(created.id);
+            // On clip upload failure, switch to edit mode so user can retry with different clips
+            const textWithSchedule = {
+              ...created,
+              schedule: {
+                id: 0, // Placeholder, will be refetched on next load
+                nextSessionDate: payload.scheduledDate,
+                notes: null,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+            };
+            setTexts((prev) => [...prev, textWithSchedule]);
+            setSelectedTextId(created.id);
+            setMode("edit");
             setDialogError(getErrorMessage(clipError));
             setIsSaving(false);
             return;
