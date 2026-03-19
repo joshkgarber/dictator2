@@ -2,21 +2,21 @@
 [Clear, concise description - e.g., "Validation error not shown on dialog"]
 
 ## Problem Statement
-A clear explanation of the bug and its impact on user experience.
+A clear explanation of the bug and its impact on the system and/or user experience.
 
 ## Current Behavior
 1. User does X
 2. System does Y (the bug)
-3. User experiences Z (pain point)
+3. User experiences Z (pain point) OR Result is Z (error details)
 
 ## Expected Behavior
-What the system should do instead to fix the UX.
+What the system should do instead to fix the problem.
 
 ## Screenshots / Recordings
 If applicable, add screenshots or screen recordings to help explain the problem.
 
 ## Root Cause (Optional)
-Technical explanation of why this happens (can be filled by maintainers after investigation).
+Technical explanation of why this happens (can be filled after investigation).
 
 ## Affected Files
 - `file/path/to/file1` - Brief description
