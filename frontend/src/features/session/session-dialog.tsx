@@ -492,6 +492,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
       title="Session"
       description={headerDescription}
       size="lg"
+      fullOpacity={true}
       footer={
         <div className="flex w-full items-center justify-between">
           <Button
