@@ -11,6 +11,7 @@ type DialogProps = {
   children: ReactNode;
   footer?: ReactNode;
   size?: "sm" | "md" | "lg";
+  fullOpacity?: boolean;
 };
 
 const sizeClassName: Record<NonNullable<DialogProps["size"]>, string> = {
@@ -27,6 +28,7 @@ export function Dialog({
   children,
   footer,
   size = "md",
+  fullOpacity = false,
 }: DialogProps) {
   if (!open) {
     return null;
@@ -34,7 +36,12 @@ export function Dialog({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-950" />
+      <div
+        className={cn(
+          "absolute inset-0",
+          fullOpacity ? "bg-slate-950" : "bg-slate-950/45",
+        )}
+      />
 
       <section
         role="dialog"
