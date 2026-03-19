@@ -878,16 +878,16 @@ def create_session_event(session_id: int):
         latest_attempt = _latest_attempt_for_position(session_id, clip_index=clip_index, rep_index=rep_index)
 
     if event_type == "replay":
-        points_delta = _get_scoring_rule(get_db(), "replay", fallback=1.0)
+        points_delta = _get_scoring_rule(get_db(), "replay", fallback=5.0)
     elif event_type == "diff":
         if latest_attempt is None:
             return error_response("VALIDATION_ERROR", "No previous attempt to show diff for", 400)
-        points_delta = _get_scoring_rule(get_db(), "diff", fallback=1.0)
+        points_delta = _get_scoring_rule(get_db(), "diff", fallback=3.0)
         details["attemptId"] = int(latest_attempt["id"])
     elif event_type == "tutor":
         if latest_attempt is None:
             return error_response("VALIDATION_ERROR", "No previous attempt to tutor for", 400)
-        points_delta = _get_scoring_rule(get_db(), "tutor", fallback=5.0)
+        points_delta = _get_scoring_rule(get_db(), "tutor", fallback=10.0)
         details["attemptId"] = int(latest_attempt["id"])
     elif event_type == "answer":
         if rep_index is None:
@@ -896,7 +896,7 @@ def create_session_event(session_id: int):
         expected_line = lines_by_index.get(clip_index)
         if expected_line is None:
             return error_response("INTERNAL_ERROR", "Missing text line for clip index", 500)
-        points_delta = _get_scoring_rule(get_db(), "answer", fallback=5.0)
+        points_delta = _get_scoring_rule(get_db(), "answer", fallback=10.0)
         details["line"] = {"index": clip_index, "text": expected_line["text"]}
     elif event_type == "keep":
         if rep_index is None:
