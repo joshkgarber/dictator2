@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDownUp, LoaderCircle, Plus } from "lucide-react";
 
 import { DataTable, type TableColumn } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
@@ -199,7 +199,17 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
         header: "Text",
         cell: (row) => (
           <div>
-            <p className="font-semibold text-slate-900">{row.name}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedTextId(row.id);
+                setDialogError(null);
+                setMode("edit");
+              }}
+              className="font-semibold text-slate-900 underline-offset-2 hover:underline"
+            >
+              {row.name}
+            </button>
             <p className="text-xs text-slate-500">Updated {formatDate(row.updatedAt)}</p>
           </div>
         ),
@@ -233,36 +243,6 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
             </div>
           );
         },
-      },
-      {
-        id: "actions",
-        header: "Actions",
-        className: "w-36",
-        cell: (row) => (
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              className="rounded-md border border-slate-300 p-1.5 text-slate-700 hover:bg-slate-100"
-              onClick={() => {
-                setSelectedTextId(row.id);
-                setDialogError(null);
-                setMode("edit");
-              }}
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              className="rounded-md border border-slate-300 p-1.5 text-rose-700 hover:bg-rose-50"
-              onClick={() => {
-                setSelectedTextId(row.id);
-                setMode("delete");
-              }}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        ),
       },
     ],
     [readinessDetails],
@@ -491,6 +471,9 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
           void upsertText(payload);
         }}
         onClearExternalError={() => setDialogError(null)}
+        onDelete={() => {
+          setMode("delete");
+        }}
       />
 
       <DeleteTextDialog
