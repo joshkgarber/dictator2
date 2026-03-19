@@ -116,6 +116,7 @@ export type TextFormDialogProps = {
   onSubmit: (payload: TextFormSubmitPayload) => void;
   onClearExternalError: () => void;
   onSuccess?: () => void;
+  onDelete?: () => void;
 };
 
 export function TextFormDialog({
@@ -128,6 +129,7 @@ export function TextFormDialog({
   onSubmit,
   onClearExternalError,
   onSuccess,
+  onDelete,
 }: TextFormDialogProps) {
   const [name, setName] = useState(text?.name || "");
   const [level, setLevel] = useState<TextLevel>(text?.level || "B1");
@@ -251,6 +253,15 @@ export function TextFormDialog({
       description="Select transcript and clip assets, then validate readiness for scheduling and sessions."
       footer={
         <>
+          {mode === "edit" && (
+            <Button
+              className="mr-auto bg-gray-200 text-white hover:bg-red-500 hover:text-black"
+              onClick={onDelete}
+              disabled={isSubmitting}
+            >
+              Delete
+            </Button>
+          )}
           <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
