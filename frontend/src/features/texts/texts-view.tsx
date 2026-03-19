@@ -781,6 +781,56 @@ function TextFormDialog({ open, mode, text, isSubmitting, externalError, onClose
               className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
               required
             />
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setScheduledDate(todayIso)}
+                disabled={isSubmitting}
+              >
+                Today
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const tomorrow = new Date();
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  setScheduledDate(toIsoDate(tomorrow));
+                }}
+                disabled={isSubmitting}
+              >
+                Tomorrow
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const nextWeek = new Date();
+                  nextWeek.setDate(nextWeek.getDate() + 7);
+                  setScheduledDate(toIsoDate(nextWeek));
+                }}
+                disabled={isSubmitting}
+              >
+                In a week
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const nextMonth = new Date();
+                  nextMonth.setDate(nextMonth.getDate() + 30);
+                  setScheduledDate(toIsoDate(nextMonth));
+                }}
+                disabled={isSubmitting}
+              >
+                In a month
+              </Button>
+            </div>
           </FormField>
         </FormSection>
 

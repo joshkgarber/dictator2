@@ -127,6 +127,56 @@ export function SessionOverDialog({ open, session, onOpenChange, onDone }: Sessi
             disabled={isSaving}
             required
           />
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setNextSessionDate(todayIso)}
+              disabled={isSaving}
+            >
+              Today
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                setNextSessionDate(toIsoDate(tomorrow));
+              }}
+              disabled={isSaving}
+            >
+              Tomorrow
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const nextWeek = new Date();
+                nextWeek.setDate(nextWeek.getDate() + 7);
+                setNextSessionDate(toIsoDate(nextWeek));
+              }}
+              disabled={isSaving}
+            >
+              In a week
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const nextMonth = new Date();
+                nextMonth.setDate(nextMonth.getDate() + 30);
+                setNextSessionDate(toIsoDate(nextMonth));
+              }}
+              disabled={isSaving}
+            >
+              In a month
+            </Button>
+          </div>
         </FormField>
       </div>
     </Dialog>
