@@ -145,28 +145,30 @@ export function HistoryView({ onEditText }: HistoryViewProps) {
   );
 
   return (
-    <section className="space-y-4">
-      <header className="rounded-lg border border-slate-300 bg-slate-50 p-3">
+    <section className="flex h-full flex-col gap-4">
+      <header className="flex-shrink-0 rounded-lg border border-slate-300 bg-slate-50 p-3">
         <h2 className="text-xl font-semibold text-slate-900">History</h2>
         <p className="mt-1 text-sm text-slate-700">Review completed sessions by completion date, text, and weighted score.</p>
       </header>
 
-      {errorMessage && <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{errorMessage}</p>}
+      {errorMessage && <p className="flex-shrink-0 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{errorMessage}</p>}
 
       {isLoading ? (
-        <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-6 text-sm text-slate-600">
+        <div className="flex flex-1 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-6 text-sm text-slate-600">
           <LoaderCircle className="h-4 w-4 animate-spin" />
           Loading completed sessions...
         </div>
       ) : (
-        <DataTable
-          title="Completed Sessions"
-          subtitle="Click a text name to open it in Edit Text."
-          columns={tableColumns}
-          rows={rows}
-          getRowKey={(row) => String(row.id)}
-          emptyMessage="No completed sessions yet."
-        />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <DataTable
+            title="Completed Sessions"
+            subtitle="Click a text name to open it in Edit Text."
+            columns={tableColumns}
+            rows={rows}
+            getRowKey={(row) => String(row.id)}
+            emptyMessage="No completed sessions yet."
+          />
+        </div>
       )}
     </section>
   );
