@@ -66,6 +66,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           persist-credentials: false
+          ref: ${{ vars.OC_TARGET_BRANCH || 'main' }}
 
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
