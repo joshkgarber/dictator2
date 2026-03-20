@@ -444,7 +444,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
           Loading texts...
         </div>
       ) : (
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-hidden">
           <DataTable
             title="Texts Inventory"
             subtitle="Transcript and clip validation determines whether a text is ready for scheduling and sessions."
