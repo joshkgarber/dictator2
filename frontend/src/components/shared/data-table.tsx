@@ -29,8 +29,8 @@ export function DataTable<T>({
   emptyMessage = "No records to display.",
 }: DataTableProps<T>) {
   return (
-    <section className="overflow-hidden rounded-xl border border-slate-300 bg-white">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
+    <section className="flex flex-col overflow-hidden rounded-xl border border-slate-300 bg-white">
+      <header className="flex flex-shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-slate-600">{title}</h3>
           {subtitle && <p className="mt-1 text-sm text-slate-700">{subtitle}</p>}
@@ -38,9 +38,9 @@ export function DataTable<T>({
         {actions}
       </header>
 
-      <div className="overflow-x-auto">
+      <div className="flex-1 overflow-y-auto">
         <table className="w-full border-separate border-spacing-0 text-sm">
-          <thead>
+          <thead className="sticky top-0 z-10">
             <tr>
               {columns.map((column) => (
                 <th
