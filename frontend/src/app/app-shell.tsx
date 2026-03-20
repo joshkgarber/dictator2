@@ -106,7 +106,7 @@ export function AppShell() {
             })}
           </nav>
 
-          <section className="flex-1 overflow-hidden border-t border-slate-300 bg-white p-3 md:p-5">
+          <section className="flex flex-col flex-1 overflow-hidden border-t border-slate-300 bg-white p-3 md:p-5">
             {activeTab === "schedule" && (
               <ScheduleView
                 key={scheduleRefreshToken}
