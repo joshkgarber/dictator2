@@ -439,7 +439,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
       {errorMessage && <p className="flex-shrink-0 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{errorMessage}</p>}
 
       {isLoading ? (
-        <div className="flex flex-shrink-0 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-6 text-sm text-slate-600">
+        <div className="flex flex-1 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-6 text-sm text-slate-600">
           <LoaderCircle className="h-4 w-4 animate-spin" />
           Loading texts...
         </div>
