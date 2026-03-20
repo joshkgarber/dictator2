@@ -106,7 +106,7 @@ export function AppShell() {
             })}
           </nav>
 
-          <section className="mt-6 rounded-xl border border-slate-300 bg-white p-3 md:p-5">
+          <section className="mt-6 h-[calc(100vh-280px)] min-h-[400px] overflow-hidden rounded-xl border border-slate-300 bg-white p-3 md:p-5">
             {activeTab === "schedule" && (
               <ScheduleView
                 key={scheduleRefreshToken}
