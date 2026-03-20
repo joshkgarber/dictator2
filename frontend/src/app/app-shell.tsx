@@ -54,10 +54,10 @@ export function AppShell() {
   }, [activeTab]);
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="h-screen animate-fade-up">
-          <section className="h-full border-x border-slate-400/60 bg-white/95 px-4 py-4 shadow-[0_14px_45px_rgba(18,28,45,0.14)] md:px-6">
-          <div className="flex flex-col gap-4 border-b border-slate-200 pb-4 md:flex-row md:items-start md:justify-between">
+    <main className="h-screen overflow-hidden bg-background">
+      <div className="flex h-full flex-col animate-fade-up">
+        <section className="flex h-full flex-col border-x border-slate-400/60 bg-white/95 shadow-[0_14px_45px_rgba(18,28,45,0.14)]">
+          <div className="flex flex-col gap-4 border-b border-slate-200 px-4 py-4 pb-4 md:flex-row md:items-start md:justify-between md:px-6">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-slate-500">Dictator 2.0 / Desktop</p>
               <h1 className="mt-1 text-3xl font-semibold leading-tight text-slate-900">Training Workspace</h1>
@@ -82,7 +82,7 @@ export function AppShell() {
             </div>
           </div>
 
-          <nav className="mt-4 flex flex-wrap gap-2" aria-label="Primary views">
+          <nav className="flex flex-wrap gap-2 px-4 py-3 md:px-6" aria-label="Primary views">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -106,7 +106,7 @@ export function AppShell() {
             })}
           </nav>
 
-          <section className="mt-6 rounded-xl border border-slate-300 bg-white p-3 md:p-5">
+          <section className="flex-1 overflow-hidden border-t border-slate-300 bg-white p-3 md:p-5">
             {activeTab === "schedule" && (
               <ScheduleView
                 key={scheduleRefreshToken}
