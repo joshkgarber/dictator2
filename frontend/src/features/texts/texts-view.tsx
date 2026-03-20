@@ -374,7 +374,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
   }
 
   return (
-    <section className="flex h-full flex-col space-y-4">
+    <section className="flex h-full flex-col gap-4">
       <header className="flex flex-shrink-0 flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-300 bg-slate-50 p-3">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Texts</h2>
@@ -444,7 +444,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
           Loading texts...
         </div>
       ) : (
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden">
           <DataTable
             title="Texts Inventory"
             subtitle="Transcript and clip validation determines whether a text is ready for scheduling and sessions."
