@@ -1,14 +1,11 @@
 ---
 name: Bug
 about: A problem needs to be solved
-title: ''
+title: 'Clear, concise description - e.g., "Validation error not shown on dialog"'
 labels: 'bug'
 assignees: ''
 
 ---
-
-## Title
-[Clear, concise description - e.g., "Validation error not shown on dialog"]
 
 ## Problem Statement
 A clear explanation of the bug and its impact on the system and/or user experience.
