@@ -12,3 +12,4 @@ backend/instance/
 backend/.env
 frontend/.env
 .env
+drawio/
