@@ -11,7 +11,7 @@ assignees: ''
 A clear explanation of the bug and its impact on the system and/or user experience.
 
 ## Current Behavior
-1. User does X
+1. User or system does X
 2. System does Y (the bug)
 3. User experiences Z (pain point) OR Result is Z (error details)
 
