@@ -1,3 +1,12 @@
+---
+name: Bug report
+about: A problem needs to be solved
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 ## Title
 [Clear, concise description - e.g., "Validation error not shown on dialog"]
 
