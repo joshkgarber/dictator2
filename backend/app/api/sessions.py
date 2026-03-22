@@ -482,8 +482,9 @@ def _position_from_cursor(cursor: int, total_clips: int, reps: int) -> tuple[int
     total_units = total_clips * reps
     if total_units <= 0 or cursor >= total_units:
         return None, None
-    rep_index = (cursor // total_clips) + 1
-    clip_index = (cursor % total_clips) + 1
+    # Clip-based ordering: each clip gets 'reps' attempts before advancing to next clip
+    clip_index = (cursor // reps) + 1
+    rep_index = (cursor % reps) + 1
     return clip_index, rep_index
 
 
