@@ -1,6 +1,6 @@
 import { requestJson } from "@/lib/api/client";
 
-export const SESSION_COMMANDS = ["replay", "keep", "diff", "tutor", "answer", "help", "exit"] as const;
+export const SESSION_COMMANDS = ["replay", "diff", "tutor", "answer", "help", "exit"] as const;
 
 export type SessionCommand = (typeof SESSION_COMMANDS)[number];
 

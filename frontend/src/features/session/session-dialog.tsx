@@ -405,11 +405,6 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         return;
       }
 
-      if (command === "keep") {
-        await tryCompleteSession(eventResult.session);
-        return;
-      }
-
       if (command === "exit") {
         appendConsole("info", "Command exit accepted. Session closed.");
         onOpenChange(false);

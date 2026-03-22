@@ -25,12 +25,11 @@ class Correction(BaseModel):
 class Corrections(BaseModel):
     corrections: list[Correction]
 
-COMMAND_TYPES = {"replay", "keep", "diff", "tutor", "answer", "help", "exit"}
+COMMAND_TYPES = {"replay", "diff", "tutor", "answer", "help", "exit"}
 SESSION_STATUSES = {"in_progress", "completed", "incomplete", "abandoned"}
 
 HELP_COMMANDS = [
     {"name": "replay", "description": "Replay the current audio clip", "shortcut": "Alt+R"},
-    {"name": "keep", "description": "Accept your latest attempt and continue", "shortcut": "Alt+K"},
     {"name": "diff", "description": "Show word-level differences from the expected line", "shortcut": "Alt+D"},
     {"name": "tutor", "description": "Request tutor help for your latest attempt", "shortcut": "Alt+T"},
     {"name": "answer", "description": "Reveal the expected answer", "shortcut": "Alt+A"},
@@ -899,20 +898,6 @@ def create_session_event(session_id: int):
             return error_response("INTERNAL_ERROR", "Missing text line for clip index", 500)
         points_delta = _get_scoring_rule(get_db(), "answer", fallback=10.0)
         details["line"] = {"index": clip_index, "text": expected_line["text"]}
-    elif event_type == "keep":
-        if reps <= 1:
-            return error_response("VALIDATION_ERROR", "`keep` is not available here", 400)
-        if rep_index is None:
-            return error_response("CONFLICT", "Session has no active line", 409)
-        if latest_attempt is None:
-            return error_response("VALIDATION_ERROR", "No previous attempt to keep", 400)
-        keep_penalty = _get_scoring_rule(get_db(), "keep", fallback=0.0)
-        points_delta += keep_penalty
-        if not bool(latest_attempt["is_correct"]):
-            points_delta += _get_scoring_rule(get_db(), "wrong_attempt", fallback=1.0)
-        next_cursor = min(cursor + 1, total_clips * reps)
-        details["attemptId"] = int(latest_attempt["id"])
-        details["keptWasCorrect"] = bool(latest_attempt["is_correct"])
     elif event_type == "help":
         details["commands"] = HELP_COMMANDS
     elif event_type == "exit":

@@ -4,7 +4,6 @@
 -- tutor: 5 -> 10 (more penalty for AI tutor help)
 -- answer: 5 -> 10 (more penalty for revealing correct answer)
 -- wrong_attempt: unchanged at 1
--- keep: unchanged at 0
 -- exit: unchanged at 0
 
 UPDATE scoring_rules SET points = 5, updated_at = datetime('now') WHERE key = 'replay';
