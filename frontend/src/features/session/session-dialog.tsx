@@ -377,7 +377,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           const feedback = await fetchSessionTutorFeedback(activeSession.id);
           const formattedHtml = await formatTutorCorrections(feedback.corrections);
           const tutorRespondedText = createColoredSpan("Tutor responded", "text-purple-700 text-sm");
-          updateConsoleEntry(placeholderId, { tone: "info", text:"", html: newPlaceholderText });
+          updateConsoleEntry(placeholderId, { tone: "info", text:"", html: tutorRespondedText });
           appendConsole("tutor", "", formattedHtml);
           setTimeout(() => {
             tutorOutputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
