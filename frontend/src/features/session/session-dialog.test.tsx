@@ -107,7 +107,7 @@ describe("SessionDialog typed command handling", () => {
     render(
       <SessionDialog
         open
-        candidate={{ textId: 9, textName: "Typed Commands", level: "A1", dueLabel: "Today" }}
+        candidate={{ textId: 9, textName: "Typed Commands", level: "A1", dueLabel: "Today", reps: 1 }}
         onOpenChange={() => {}}
         onSessionOver={() => {}}
       />,

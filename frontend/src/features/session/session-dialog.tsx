@@ -262,7 +262,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
 
     void (async () => {
       try {
-        const created = await startTextSession(candidate.textId, 1);
+        const created = await startTextSession(candidate.textId, candidate.reps);
         if (!mountedRef.current) {
           return;
         }
@@ -518,12 +518,15 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
           <header className="flex items-center justify-between gap-3">
             <p className="text-sm text-slate-700">
               Clip {session?.current.clipIndex || 0}/{session?.totalClips || 0}
+              {session?.reps && session.reps > 1 && (
+                <span className="ml-1">• Rep {session?.current.repIndex || 0}/{session?.reps}</span>
+              )}
             </p>
             <p className="text-sm text-slate-700">Score: {session?.rawScore ?? 0}</p>
           </header>
 
           <form onSubmit={onSubmit} className="space-y-3">
-            <FormField htmlFor="attempt-input">
+            <FormField label="Your attempt" htmlFor="attempt-input">
               <input
                 id="attempt-input"
                 ref={inputRef}

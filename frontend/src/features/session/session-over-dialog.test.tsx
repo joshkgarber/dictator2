@@ -52,7 +52,7 @@ describe("SessionOverDialog", () => {
       createdAt: "2026-03-07T00:00:00Z",
       updatedAt: "2026-03-07T00:00:00Z",
       dueStatus: "upcoming",
-      text: { id: 55, name: "Reschedule Flow", level: "A2", isReady: true },
+      text: { id: 55, name: "Reschedule Flow", level: "A2", isReady: true, reps: 1 },
     });
 
     const onDone = vi.fn();

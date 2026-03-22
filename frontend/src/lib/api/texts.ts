@@ -12,6 +12,7 @@ export type TextRecord = {
   lineCount: number;
   clipCount: number;
   isReady: boolean;
+  reps: number;
   schedule: {
     id: number;
     nextSessionDate: string;
@@ -31,6 +32,7 @@ type CreateTextPayload = {
   name: string;
   level: TextLevel;
   transcriptRaw: string;
+  reps?: number;
 };
 
 type TextResponse = {
@@ -84,7 +86,7 @@ export async function createText(payload: CreateTextPayload): Promise<TextRecord
 
 export async function updateText(
   textId: number,
-  payload: Partial<Pick<TextRecord, "name" | "level">>,
+  payload: Partial<Pick<TextRecord, "name" | "level" | "reps">>,
 ): Promise<TextRecord> {
   const response = await requestJson<TextResponse>(`/api/texts/${textId}`, {
     method: "PATCH",
