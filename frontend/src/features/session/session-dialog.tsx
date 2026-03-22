@@ -79,7 +79,7 @@ async function formatTutorCorrections(corrections: Correction[]): Promise<string
     const takeawayHtml = await marked.parse(escapedTakeaway);
 
     parts.push(`
-      <div class="tutor-correction mb-4 p-3 border-l-4 border-blue-500 bg-slate-50 rounded">
+      <div class="tutor-correction mb-4 p-3 border-l-4 border-purple-500 bg-purple-50/50 rounded">
         <div class="tutor-error font-semibold text-red-700 mb-2">${errorHtml}</div>
         <div class="tutor-explanation text-slate-700 mb-2">${explanationHtml}</div>
         <div class="tutor-takeaway text-green-700 font-medium">${takeawayHtml}</div>
@@ -376,7 +376,8 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         try {
           const feedback = await fetchSessionTutorFeedback(activeSession.id);
           const formattedHtml = await formatTutorCorrections(feedback.corrections);
-          updateConsoleEntry(placeholderId, { tone: "info", text: "Tutor responded" });
+          const tutorRespondedText = createColoredSpan("Tutor responded", "text-purple-700 text-sm");
+          updateConsoleEntry(placeholderId, { tone: "info", text:"", html: tutorRespondedText });
           appendConsole("tutor", "", formattedHtml);
           setTimeout(() => {
             tutorOutputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
