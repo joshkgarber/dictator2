@@ -701,7 +701,7 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
                 </li>
               </ul>
               <p className="text-slate-600 mt-2">
-                <strong>Note:</strong> The <code className="font-mono text-xs bg-slate-100 px-1">help</code> and <code className="font-mono text-xs bg-slate-100 px-1">exit</code> commands incur no penalties.
+                <strong>Note:</strong> The <code className="font-mono text-xs bg-slate-100 px-1">help</code> command incurs no penalty.
               </p>
             </section>
 
