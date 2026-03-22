@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Upload, FolderOpen } from "lucide-react";
 
 import { FormField, FormSection } from "@/components/shared/form-primitives";
 import { Button } from "@/components/ui/button";
@@ -400,24 +400,38 @@ export function TextFormDialog({
             htmlFor="text-transcript"
             hint="Plain text (.txt). One transcript line becomes one session clip index."
           >
-            <input
-              id="text-transcript"
-              type="file"
-              accept=".txt,text/plain"
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
-              onChange={(event) => {
-                const file = event.target.files?.[0] || null;
-                void handleTranscriptSelection(file);
-              }}
-            />
-            {transcriptFile && (
-              <p className="text-xs text-slate-600">
-                {transcriptFile.name} {transcriptLineCount !== null ? `(${transcriptLineCount} parsed lines)` : ""}
-              </p>
-            )}
-            {!transcriptFile && mode === "edit" && (
-              <p className="text-xs text-slate-500">Keeping existing transcript ({text?.lineCount || 0} lines).</p>
-            )}
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="text-transcript"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 focus-within:ring-2 focus-within:ring-slate-400 focus-within:ring-offset-2"
+              >
+                <Upload className="h-4 w-4" />
+                <span>{transcriptFile ? "Change file" : "Choose file"}</span>
+                <input
+                  id="text-transcript"
+                  type="file"
+                  accept=".txt,text/plain"
+                  className="sr-only"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] || null;
+                    void handleTranscriptSelection(file);
+                  }}
+                />
+              </label>
+              {transcriptFile && (
+                <p className="text-sm text-slate-700">
+                  <span className="font-medium">Selected:</span> {transcriptFile.name}{" "}
+                  {transcriptLineCount !== null && (
+                    <span className="text-slate-500">({transcriptLineCount} lines)</span>
+                  )}
+                </p>
+              )}
+              {!transcriptFile && mode === "edit" && (
+                <p className="text-sm text-slate-500">
+                  Keeping existing transcript ({text?.lineCount || 0} lines).
+                </p>
+              )}
+            </div>
           </FormField>
 
           <FormField
@@ -425,23 +439,36 @@ export function TextFormDialog({
             htmlFor="text-clips"
             hint="Choose a folder with c-<index>.mp3 clips. Uploading clips updates existing indexes."
           >
-            <input
-              id="text-clips"
-              type="file"
-              multiple
-              accept=".mp3,audio/mpeg"
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
-              onChange={(event) => {
-                setClips(Array.from(event.target.files || []));
-                onClearExternalError();
-              }}
-              {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
-            />
-            <p className="text-xs text-slate-600">
-              {clips.length > 0
-                ? `${clips.length} clips selected (${inspectClipFiles(clips).indexes.length} valid c-<index>.mp3 names)`
-                : "No new clips selected"}
-            </p>
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="text-clips"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 focus-within:ring-2 focus-within:ring-slate-400 focus-within:ring-offset-2"
+              >
+                <FolderOpen className="h-4 w-4" />
+                <span>{clips.length > 0 ? "Change folder" : "Choose folder"}</span>
+                <input
+                  id="text-clips"
+                  type="file"
+                  multiple
+                  accept=".mp3,audio/mpeg"
+                  className="sr-only"
+                  onChange={(event) => {
+                    setClips(Array.from(event.target.files || []));
+                    onClearExternalError();
+                  }}
+                  {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
+                />
+              </label>
+              <p className="text-sm text-slate-700">
+                {clips.length > 0 ? (
+                  <>
+                    <span className="font-medium">Selected:</span> {clips.length} clips ({inspectClipFiles(clips).indexes.length} valid)
+                  </>
+                ) : (
+                  <span className="text-slate-500">No new clips selected</span>
+                )}
+              </p>
+            </div>
           </FormField>
           {externalError && (
             <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
