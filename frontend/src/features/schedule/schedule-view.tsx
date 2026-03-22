@@ -48,6 +48,7 @@ type CalendarDay = {
   dayLabel: string;
   dayOfMonth: string;
   isToday: boolean;
+  isCurrentMonth: boolean;
   sessions: ScheduleRow[];
 };
 
@@ -71,18 +72,51 @@ function parseIsoDate(value: string): Date {
   return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
 }
 
-function getWeekStart(date: Date): Date {
+function getMonthStart(date: Date): Date {
   const clone = new Date(date);
-  const day = clone.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  clone.setDate(clone.getDate() + diff);
+  clone.setDate(1);
   clone.setHours(12, 0, 0, 0);
   return clone;
 }
 
-function shiftDays(date: Date, days: number): Date {
+function getMonthDays(date: Date): Date[] {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  
+  // First day of the month
+  const firstDay = new Date(year, month, 1, 12, 0, 0, 0);
+  // Last day of the month
+  const lastDay = new Date(year, month + 1, 0, 12, 0, 0, 0);
+  
+  const days: Date[] = [];
+  
+  // Add padding days from previous month to start on Sunday
+  const firstDayOfWeek = firstDay.getDay();
+  for (let i = firstDayOfWeek; i > 0; i--) {
+    const paddingDate = new Date(year, month, 1 - i, 12, 0, 0, 0);
+    days.push(paddingDate);
+  }
+  
+  // Add all days of the current month
+  const daysInMonth = lastDay.getDate();
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push(new Date(year, month, i, 12, 0, 0, 0));
+  }
+  
+  // Add padding days from next month to complete the last week
+  const lastDayOfWeek = lastDay.getDay();
+  const remainingDays = 6 - lastDayOfWeek;
+  for (let i = 1; i <= remainingDays; i++) {
+    const paddingDate = new Date(year, month + 1, i, 12, 0, 0, 0);
+    days.push(paddingDate);
+  }
+  
+  return days;
+}
+
+function shiftMonths(date: Date, months: number): Date {
   const clone = new Date(date);
-  clone.setDate(clone.getDate() + days);
+  clone.setMonth(clone.getMonth() + months);
   return clone;
 }
 
@@ -154,7 +188,7 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [rows, setRows] = useState<ScheduleRow[]>([]);
   const [todayIso, setTodayIso] = useState(() => toIsoDate(new Date()));
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
+  const [currentMonth, setCurrentMonth] = useState(() => getMonthStart(new Date()));
   
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -171,7 +205,7 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
       const resolvedToday = response.today || toIsoDate(new Date());
       setTodayIso(resolvedToday);
       setRows(toScheduleRows(response.schedule, resolvedToday));
-      setWeekStart(getWeekStart(parseIsoDate(resolvedToday)));
+      setCurrentMonth(getMonthStart(parseIsoDate(resolvedToday)));
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {
@@ -194,7 +228,7 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
         const resolvedToday = response.today || toIsoDate(new Date());
         setTodayIso(resolvedToday);
         setRows(toScheduleRows(response.schedule, resolvedToday));
-        setWeekStart(getWeekStart(parseIsoDate(resolvedToday)));
+        setCurrentMonth(getMonthStart(parseIsoDate(resolvedToday)));
       } catch (error) {
         if (!active) {
           return;
@@ -327,7 +361,7 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
     };
   }, [groupedRows]);
 
-  const weekDays = useMemo<CalendarDay[]>(() => {
+  const monthDays = useMemo<CalendarDay[]>(() => {
     const entriesByDate = new Map<string, ScheduleRow[]>();
     for (const row of rows) {
       const existing = entriesByDate.get(row.dueDate);
@@ -338,10 +372,12 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
       }
     }
 
-    return Array.from({ length: 7 }, (_, index) => {
-      const dayDate = shiftDays(weekStart, index);
+    const days = getMonthDays(currentMonth);
+    
+    return days.map((dayDate, index) => {
       const dateIso = toIsoDate(dayDate);
       const sessions = entriesByDate.get(dateIso) || [];
+      const isCurrentMonth = dayDate.getMonth() === currentMonth.getMonth();
 
       return {
         key: `${dateIso}-${index}`,
@@ -349,18 +385,19 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
         dayLabel: WEEKDAY_LABELS[dayDate.getDay()],
         dayOfMonth: String(dayDate.getDate()),
         isToday: dateIso === todayIso,
+        isCurrentMonth,
         sessions,
       };
     });
-  }, [rows, todayIso, weekStart]);
+  }, [rows, todayIso, currentMonth]);
 
-  const weekLabel = useMemo(
+  const monthLabel = useMemo(
     () =>
       new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-      }).format(weekStart),
-    [weekStart],
+        month: "long",
+        year: "numeric",
+      }).format(currentMonth),
+    [currentMonth],
   );
 
   const hasRows = rows.length > 0;
@@ -459,19 +496,19 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
 
         <article className="flex flex-col overflow-hidden rounded-xl border border-slate-300 bg-white">
           <header className="flex flex-shrink-0 items-center justify-between border-b border-slate-200 px-4 py-3">
-            <h3 className="font-semibold text-slate-800">Week of {weekLabel}</h3>
+            <h3 className="font-semibold text-slate-800">{monthLabel}</h3>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 className="rounded-md border border-slate-300 p-1.5 text-slate-700 hover:bg-slate-100"
-                onClick={() => setWeekStart((prev) => shiftDays(prev, -7))}
+                onClick={() => setCurrentMonth((prev) => shiftMonths(prev, -1))}
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 type="button"
                 className="rounded-md border border-slate-300 p-1.5 text-slate-700 hover:bg-slate-100"
-                onClick={() => setWeekStart((prev) => shiftDays(prev, 7))}
+                onClick={() => setCurrentMonth((prev) => shiftMonths(prev, 1))}
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -479,20 +516,28 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
           </header>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="grid grid-cols-7 gap-1.5 px-3 py-4 text-center">
-              {weekDays.map((day) => (
+            <div className="grid grid-cols-7 gap-1.5 px-3 py-4">
+              {WEEKDAY_LABELS.map((label) => (
+                <div key={label} className="text-center text-xs font-semibold uppercase text-slate-500 py-1">
+                  {label}
+                </div>
+              ))}
+              {monthDays.map((day) => (
                 <div
                   key={day.key}
                   className={cn(
-                    "flex flex-col rounded-lg border p-2 min-h-[100px] min-w-[80px]",
+                    "flex flex-col rounded-lg border p-2 min-h-[80px] min-w-[80px]",
                     day.isToday ? "border-slate-900 bg-slate-100" : "border-slate-200 bg-slate-50",
+                    !day.isCurrentMonth && "opacity-50",
                   )}
                 >
-                  <p className="text-xs font-semibold uppercase text-slate-500">{day.dayLabel}</p>
-                  <p className="text-sm font-medium text-slate-800">{day.dayOfMonth}</p>
+                  <p className={cn(
+                    "text-sm font-medium",
+                    day.isToday ? "text-slate-900" : "text-slate-800"
+                  )}>{day.dayOfMonth}</p>
                   <div className="mt-1 flex flex-1 flex-col gap-1">
                     {day.sessions.length > 0 ? (
-                      day.sessions.map((session) => (
+                      day.sessions.slice(0, 3).map((session) => (
                         <div
                           key={session.id}
                           className="truncate rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-white"
@@ -503,6 +548,9 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
                       ))
                     ) : (
                       <p className="text-[10px] text-slate-400">-</p>
+                    )}
+                    {day.sessions.length > 3 && (
+                      <p className="text-[10px] text-slate-500 text-center">+{day.sessions.length - 3} more</p>
                     )}
                   </div>
                 </div>
