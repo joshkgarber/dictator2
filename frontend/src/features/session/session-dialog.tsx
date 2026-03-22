@@ -605,30 +605,85 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         </section>
 
         {isInstructionsOpen && (
-          <aside className="flex flex-col gap-3 rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-700">
+          <aside className="flex flex-col gap-4 rounded-lg border border-slate-300 bg-white p-4 text-sm text-slate-700">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold uppercase tracking-[0.08em] text-slate-700">Instructions</h4>
             </div>
-            <p>
-              Listen to each clip, then type your attempt and press Enter. Use a reserved command only when you need a session action.
-            </p>
-            <ul className="space-y-1">
-              {SESSION_COMMANDS.map((command) => (
-                <li key={command} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700">
-                  {command}
+
+            <section className="space-y-2">
+              <h5 className="font-semibold text-slate-800">Session Flow</h5>
+              <p className="text-slate-600">
+                Listen to each audio clip, then type what you hear and press Enter to submit. 
+                Your attempt will be scored—you can retry the same clip multiple times. 
+                Lower scores are better (fewer mistakes). Once you're satisfied or ready to move on, 
+                press Enter again to continue to the next clip.
+              </p>
+            </section>
+
+            <section className="space-y-2">
+              <h5 className="font-semibold text-slate-800">Available Commands</h5>
+              <p className="text-xs text-slate-500 mb-2">
+                Type any command exactly as shown and press Enter. Extra words will be treated as a regular attempt.
+              </p>
+              <ul className="space-y-2">
+                <li className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                  <code className="font-mono text-xs font-semibold text-slate-700">replay</code>
+                  <span className="text-slate-600 ml-2">— Replay the current audio clip</span>
                 </li>
-              ))}
-            </ul>
-            <p className="text-xs text-slate-500">
-              Exact matching is enforced. Any other input, including command-like text with extra words, is submitted as an attempt.
-            </p>
-            <div className="mt-auto flex justify-center pt-3">
+                <li className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                  <code className="font-mono text-xs font-semibold text-slate-700">diff</code>
+                  <span className="text-slate-600 ml-2">— Show word-by-word comparison of your attempt vs. correct answer</span>
+                </li>
+                <li className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                  <code className="font-mono text-xs font-semibold text-slate-700">tutor</code>
+                  <span className="text-slate-600 ml-2">— Get AI tutor feedback on your attempt</span>
+                </li>
+                <li className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                  <code className="font-mono text-xs font-semibold text-slate-700">answer</code>
+                  <span className="text-slate-600 ml-2">— Reveal the correct answer for this clip</span>
+                </li>
+                <li className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                  <code className="font-mono text-xs font-semibold text-slate-700">help</code>
+                  <span className="text-slate-600 ml-2">— Toggle this instructions panel on/off</span>
+                </li>
+                <li className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                  <code className="font-mono text-xs font-semibold text-slate-700">exit</code>
+                  <span className="text-slate-600 ml-2">— End session early (progress will not be saved)</span>
+                </li>
+              </ul>
+            </section>
+
+            <section className="space-y-2">
+              <h5 className="font-semibold text-slate-800">Keyboard Shortcuts</h5>
+              <ul className="space-y-1 text-slate-600">
+                <li className="flex items-center gap-2">
+                  <kbd className="rounded border border-slate-300 bg-slate-100 px-2 py-0.5 font-mono text-xs">↑</kbd>
+                  <span>Previous attempt (cycles through history)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <kbd className="rounded border border-slate-300 bg-slate-100 px-2 py-0.5 font-mono text-xs">↓</kbd>
+                  <span>Next attempt (cycles through history)</span>
+                </li>
+              </ul>
+            </section>
+
+            <section className="space-y-2">
+              <h5 className="font-semibold text-slate-800">Tips</h5>
+              <ul className="list-disc list-inside space-y-1 text-slate-600">
+                <li>Commands must match exactly—no extra spaces or words</li>
+                <li>Use <code className="font-mono text-xs bg-slate-100 px-1 rounded">diff</code> to see exactly where mistakes were made</li>
+                <li>The <code className="font-mono text-xs bg-slate-100 px-1 rounded">tutor</code> command provides personalized feedback on grammar and spelling</li>
+                <li>Your session progress saves automatically when completing all clips</li>
+              </ul>
+            </section>
+
+            <div className="mt-auto flex justify-center pt-3 border-t border-slate-200">
               <Button
                 variant="outline"
                 className="rounded-full text-xs"
                 onClick={() => setIsInstructionsOpen(false)}
               >
-                Close
+                Close Instructions
               </Button>
             </div>
           </aside>
