@@ -675,8 +675,33 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
 
             <section>
               <h5 className="font-semibold text-slate-900 mb-2">Scoring System</h5>
-              <p className="text-slate-600">
-                Your score tracks your performance. Lower scores are better! You earn points for correct answers and may receive penalties for incorrect attempts or using the <code className="font-mono text-xs bg-slate-100 px-1">answer</code> command.
+              <p className="text-slate-600 mb-2">
+                Your score tracks your performance. <strong>Lower scores are better!</strong> Penalties are added to your score for incorrect attempts and using help commands:
+              </p>
+              <ul className="space-y-1 text-slate-600 ml-1">
+                <li className="flex gap-2 items-start">
+                  <span className="font-mono text-xs bg-slate-100 px-1 rounded shrink-0">+1</span>
+                  <span>Wrong answer (each incorrect attempt)</span>
+                </li>
+                <li className="flex gap-2 items-start">
+                  <span className="font-mono text-xs bg-slate-100 px-1 rounded shrink-0">+3</span>
+                  <span>Using <code className="font-mono text-xs bg-slate-100 px-1">diff</code> to see word-by-word comparison</span>
+                </li>
+                <li className="flex gap-2 items-start">
+                  <span className="font-mono text-xs bg-slate-100 px-1 rounded shrink-0">+5</span>
+                  <span>Using <code className="font-mono text-xs bg-slate-100 px-1">replay</code> to hear the clip again</span>
+                </li>
+                <li className="flex gap-2 items-start">
+                  <span className="font-mono text-xs bg-slate-100 px-1 rounded shrink-0">+10</span>
+                  <span>Using <code className="font-mono text-xs bg-slate-100 px-1">tutor</code> for AI feedback</span>
+                </li>
+                <li className="flex gap-2 items-start">
+                  <span className="font-mono text-xs bg-slate-100 px-1 rounded shrink-0">+10</span>
+                  <span>Using <code className="font-mono text-xs bg-slate-100 px-1">answer</code> to reveal the correct answer</span>
+                </li>
+              </ul>
+              <p className="text-slate-600 mt-2">
+                <strong>Note:</strong> The <code className="font-mono text-xs bg-slate-100 px-1">help</code> and <code className="font-mono text-xs bg-slate-100 px-1">exit</code> commands incur no penalties.
               </p>
             </section>
 
