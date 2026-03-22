@@ -5,6 +5,7 @@ export type ScheduleTextRef = {
   name: string;
   level: string;
   isReady: boolean;
+  reps: number;
 };
 
 export type ScheduleEntry = {

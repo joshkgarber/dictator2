@@ -26,6 +26,7 @@ export type TextFormSubmitPayload = {
   scheduledDate: string;
   transcriptRaw: string | null;
   clips: File[];
+  reps: number;
 };
 
 type ClipInspection = {
@@ -133,6 +134,7 @@ export function TextFormDialog({
 }: TextFormDialogProps) {
   const [name, setName] = useState(text?.name || "");
   const [level, setLevel] = useState<TextLevel>(text?.level || "B1");
+  const [reps, setReps] = useState<number>(text?.reps || 1);
   const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
   const [transcriptRaw, setTranscriptRaw] = useState<string | null>(null);
   const [transcriptLineCount, setTranscriptLineCount] = useState<number | null>(null);
@@ -148,6 +150,7 @@ export function TextFormDialog({
 
     setName(text?.name || "");
     setLevel(text?.level || "B1");
+    setReps(text?.reps || 1);
     setTranscriptFile(null);
     setTranscriptRaw(null);
     setTranscriptLineCount(null);
@@ -188,6 +191,11 @@ export function TextFormDialog({
 
     if (scheduledDate < todayIso) {
       setLocalError("Scheduled date cannot be in the past");
+      return;
+    }
+
+    if (reps < 1 || reps > 10) {
+      setLocalError("Repetitions must be between 1 and 10");
       return;
     }
 
@@ -238,6 +246,7 @@ export function TextFormDialog({
       scheduledDate,
       transcriptRaw,
       clips,
+      reps,
     });
   }
 
@@ -304,6 +313,19 @@ export function TextFormDialog({
                 </option>
               ))}
             </select>
+          </FormField>
+
+          <FormField label="Repetitions" htmlFor="text-reps" hint="Number of times each clip is repeated during practice (1-10).">
+            <input
+              id="text-reps"
+              type="number"
+              min={1}
+              max={10}
+              value={reps}
+              onChange={(event) => setReps(parseInt(event.target.value, 10) || 1)}
+              className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
+              required
+            />
           </FormField>
 
           <FormField label="Scheduled Date" htmlFor="text-scheduled-date" hint="Required. Used to place the text in the session schedule.">

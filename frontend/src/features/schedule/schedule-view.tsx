@@ -24,6 +24,7 @@ export type NextSessionCandidate = {
   textName: string;
   level: string;
   dueLabel: string;
+  reps: number;
 };
 
 type DueBucket = "Overdue" | "Due Today" | "Upcoming";
@@ -36,6 +37,7 @@ type ScheduleRow = {
   dueDate: string;
   dueLabel: string;
   isReady: boolean;
+  reps: number;
   bucket: "Overdue" | "Due Today" | "Upcoming";
   createdAt: string;
 };
@@ -116,6 +118,7 @@ function toScheduleRows(rows: ScheduleEntry[], todayIso: string): ScheduleRow[] 
     dueDate: row.nextSessionDate,
     dueLabel: formatDueLabel(row.nextSessionDate, todayIso),
     isReady: row.text.isReady,
+    reps: row.text.reps,
     bucket: getDueBucket(row.nextSessionDate, todayIso),
     createdAt: row.createdAt,
   }));
@@ -249,8 +252,8 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
     try {
       let changed = false;
 
-      if (selectedText.name !== payload.name || selectedText.level !== payload.level) {
-        await updateText(selectedText.id, { name: payload.name, level: payload.level });
+      if (selectedText.name !== payload.name || selectedText.level !== payload.level || selectedText.reps !== payload.reps) {
+        await updateText(selectedText.id, { name: payload.name, level: payload.level, reps: payload.reps });
         changed = true;
       }
 
@@ -320,6 +323,7 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
       textName: candidate.textName,
       level: candidate.level,
       dueLabel: candidate.dueLabel,
+      reps: candidate.reps,
     };
   }, [groupedRows]);
 
