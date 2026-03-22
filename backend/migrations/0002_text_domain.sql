@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS session_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id INTEGER NOT NULL,
     clip_index INTEGER NOT NULL,
-    event_type TEXT NOT NULL CHECK (event_type IN ('replay', 'diff', 'tutor', 'answer', 'help', 'keep', 'exit')),
+    event_type TEXT NOT NULL CHECK (event_type IN ('replay', 'diff', 'tutor', 'answer', 'help', 'exit')),
     points_delta REAL NOT NULL DEFAULT 0,
     payload_json TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -138,5 +138,4 @@ INSERT OR IGNORE INTO scoring_rules(key, points) VALUES
     ('diff', 1),
     ('tutor', 5),
     ('answer', 5),
-    ('keep', 0),
     ('exit', 0);
