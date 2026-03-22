@@ -32,9 +32,6 @@ def _parse_positive_int(value, *, default: int | None = None) -> int | None:
         parsed = int(text)
         return parsed if parsed > 0 else None
     return None
-    if not isinstance(value, str):
-        return ""
-    return value.strip()
 
 
 def _transcript_from_payload(payload: dict) -> str | None:

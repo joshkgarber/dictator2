@@ -54,6 +54,7 @@ def _schedule_payload(row) -> dict:
             "name": row["text_name"],
             "level": row["text_level"],
             "isReady": bool(row["is_ready"]),
+            "reps": int(row["reps"]),
         },
     }
 
@@ -75,7 +76,8 @@ def _load_schedule_record(text_id: int):
           END AS due_status,
           t.name AS text_name,
           t.level AS text_level,
-          t.is_ready
+          t.is_ready,
+          t.reps
         FROM text_schedules ts
         JOIN texts t ON t.id = ts.text_id
         WHERE ts.user_id = ? AND ts.text_id = ?
@@ -114,7 +116,8 @@ def list_schedule():
           END AS due_status,
           t.name AS text_name,
           t.level AS text_level,
-          t.is_ready
+          t.is_ready,
+          t.reps
         FROM text_schedules ts
         JOIN texts t ON t.id = ts.text_id
         WHERE {where_clause}
