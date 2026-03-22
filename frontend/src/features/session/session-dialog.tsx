@@ -605,24 +605,92 @@ export function SessionDialog({ open, candidate, onOpenChange, onSessionOver }: 
         </section>
 
         {isInstructionsOpen && (
-          <aside className="flex flex-col gap-3 rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-700">
+          <aside className="flex flex-col gap-4 rounded-lg border border-slate-300 bg-white p-4 text-sm text-slate-700 overflow-y-auto max-h-[500px]">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold uppercase tracking-[0.08em] text-slate-700">Instructions</h4>
             </div>
-            <p>
-              Listen to each clip, then type your attempt and press Enter. Use a reserved command only when you need a session action.
-            </p>
-            <ul className="space-y-1">
-              {SESSION_COMMANDS.map((command) => (
-                <li key={command} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700">
-                  {command}
+
+            <section>
+              <h5 className="font-semibold text-slate-900 mb-2">Session Flow</h5>
+              <p className="text-slate-600 mb-2">
+                Each session consists of multiple audio clips. For each clip:
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-slate-600 ml-1">
+                <li>Listen to the audio clip (auto-plays when ready)</li>
+                <li>Type what you heard in the input field</li>
+                <li>Press Enter to submit your attempt</li>
+                <li>Continue to the next clip or repeat if needed</li>
+              </ol>
+              <p className="text-slate-600 mt-2">
+                <strong>Repetitions:</strong> You may need to complete multiple reps of the same text. Each rep tests all clips in sequence.
+              </p>
+            </section>
+
+            <section>
+              <h5 className="font-semibold text-slate-900 mb-2">Available Commands</h5>
+              <p className="text-slate-600 mb-2">
+                Type these exact commands and press Enter:
+              </p>
+              <ul className="space-y-2">
+                <li className="flex gap-2 items-start">
+                  <code className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700 shrink-0">replay</code>
+                  <span className="text-slate-600">Replay the current audio clip</span>
                 </li>
-              ))}
-            </ul>
-            <p className="text-xs text-slate-500">
-              Exact matching is enforced. Any other input, including command-like text with extra words, is submitted as an attempt.
-            </p>
-            <div className="mt-auto flex justify-center pt-3">
+                <li className="flex gap-2 items-start">
+                  <code className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700 shrink-0">diff</code>
+                  <span className="text-slate-600">Show word-by-word comparison of your attempt vs. correct answer</span>
+                </li>
+                <li className="flex gap-2 items-start">
+                  <code className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700 shrink-0">tutor</code>
+                  <span className="text-slate-600">Get AI tutor feedback on your attempt with explanations and tips</span>
+                </li>
+                <li className="flex gap-2 items-start">
+                  <code className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700 shrink-0">answer</code>
+                  <span className="text-slate-600">Reveal the correct answer for the current clip</span>
+                </li>
+                <li className="flex gap-2 items-start">
+                  <code className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700 shrink-0">help</code>
+                  <span className="text-slate-600">Toggle this instructions panel on/off</span>
+                </li>
+                <li className="flex gap-2 items-start">
+                  <code className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-xs text-slate-700 shrink-0">exit</code>
+                  <span className="text-slate-600">End session early (progress will not be saved)</span>
+                </li>
+              </ul>
+            </section>
+
+            <section>
+              <h5 className="font-semibold text-slate-900 mb-2">Keyboard Shortcuts</h5>
+              <ul className="space-y-1 text-slate-600">
+                <li className="flex gap-2 items-center">
+                  <kbd className="rounded border border-slate-300 bg-slate-100 px-2 py-0.5 font-mono text-xs">↑</kbd>
+                  <span>Cycle through previous attempts (input history)</span>
+                </li>
+                <li className="flex gap-2 items-center">
+                  <kbd className="rounded border border-slate-300 bg-slate-100 px-2 py-0.5 font-mono text-xs">↓</kbd>
+                  <span>Cycle forward through attempts, or clear input</span>
+                </li>
+              </ul>
+            </section>
+
+            <section>
+              <h5 className="font-semibold text-slate-900 mb-2">Scoring System</h5>
+              <p className="text-slate-600">
+                Your score tracks your performance. Lower scores are better! You earn points for correct answers and may receive penalties for incorrect attempts or using the <code className="font-mono text-xs bg-slate-100 px-1">answer</code> command.
+              </p>
+            </section>
+
+            <section>
+              <h5 className="font-semibold text-slate-900 mb-2">Tips</h5>
+              <ul className="list-disc list-inside space-y-1 text-slate-600 ml-1">
+                <li>Exact matching is enforced — type exactly what you hear</li>
+                <li>Use <code className="font-mono text-xs bg-slate-100 px-1">diff</code> to understand where you went wrong</li>
+                <li>Use <code className="font-mono text-xs bg-slate-100 px-1">tutor</code> for detailed feedback on errors</li>
+                <li>Arrow keys save time when refining similar attempts</li>
+              </ul>
+            </section>
+
+            <div className="mt-auto flex justify-center pt-2">
               <Button
                 variant="outline"
                 className="rounded-full text-xs"
