@@ -535,9 +535,9 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
                     "text-sm font-medium",
                     day.isToday ? "text-slate-900" : "text-slate-800"
                   )}>{day.dayOfMonth}</p>
-                  <div className="mt-1 flex flex-1 flex-col gap-1">
+                  <div className="mt-1 flex flex-1 flex-col gap-1 overflow-y-auto">
                     {day.sessions.length > 0 ? (
-                      day.sessions.slice(0, 3).map((session) => (
+                      day.sessions.map((session) => (
                         <div
                           key={session.id}
                           className="truncate rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold text-white"
@@ -548,9 +548,6 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
                       ))
                     ) : (
                       <p className="text-[10px] text-slate-400">-</p>
-                    )}
-                    {day.sessions.length > 3 && (
-                      <p className="text-[10px] text-slate-500 text-center">+{day.sessions.length - 3} more</p>
                     )}
                   </div>
                 </div>
