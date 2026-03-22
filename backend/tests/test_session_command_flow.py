@@ -37,7 +37,8 @@ def test_session_event_commands_dispatch_and_misspelled_commands_remain_attempts
     assert isinstance(help_payload["payload"]["commands"], list)
 
 
-def test_keep_command_advances_session_after_incorrect_attempt(client, create_ready_text, auth_headers):
+def test_keep_command_rejected_when_reps_is_one(client, create_ready_text, auth_headers):
+    """Test that keep command is rejected when reps=1"""
     text_id = create_ready_text(lines=["eins", "zwei"])
 
     start_response = client.post(
@@ -61,8 +62,7 @@ def test_keep_command_advances_session_after_incorrect_attempt(client, create_re
         json={"eventType": "keep"},
         headers=auth_headers,
     )
-    assert keep_event.status_code == 200
-    keep_payload = keep_event.get_json()
-    assert keep_payload["event"]["eventType"] == "keep"
-    assert keep_payload["event"]["payload"]["keptWasCorrect"] is False
-    assert keep_payload["session"]["progress"]["cursor"] == 1
+    assert keep_event.status_code == 400
+    error_payload = keep_event.get_json()
+    assert error_payload["error"]["code"] == "VALIDATION_ERROR"
+    assert "`keep` is not available here" in error_payload["error"]["message"]

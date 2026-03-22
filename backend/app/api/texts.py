@@ -16,6 +16,27 @@ def _normalize_text(value) -> str:
     return value.strip()
 
 
+def _parse_positive_int(value, *, default: int | None = None) -> int | None:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value if value > 0 else None
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return default
+        if not text.isdigit():
+            return None
+        parsed = int(text)
+        return parsed if parsed > 0 else None
+    return None
+    if not isinstance(value, str):
+        return ""
+    return value.strip()
+
+
 def _transcript_from_payload(payload: dict) -> str | None:
     if "transcriptRaw" in payload:
         transcript_raw = payload.get("transcriptRaw")
@@ -151,6 +172,7 @@ def _text_payload(text_row, lines: list[dict] | None = None, *, include_relation
         "clipCount": text_row["clip_count"],
         "lineCount": text_row["line_count"],
         "isReady": bool(text_row["is_ready"]),
+        "reps": int(text_row["reps"]),
         "createdAt": text_row["created_at"],
         "updatedAt": text_row["updated_at"],
     }
@@ -188,6 +210,7 @@ def _get_owned_text(text_id: int):
           clip_count,
           line_count,
           is_ready,
+          reps,
           created_at,
           updated_at
         FROM texts
@@ -255,6 +278,7 @@ def list_texts():
               clip_count,
               line_count,
               is_ready,
+              reps,
               created_at,
               updated_at
             FROM texts
@@ -275,6 +299,7 @@ def list_texts():
               clip_count,
               line_count,
               is_ready,
+              reps,
               created_at,
               updated_at
             FROM texts
@@ -293,6 +318,7 @@ def create_text():
     name = _normalize_text(payload.get("name"))
     level = _normalize_text(payload.get("level"))
     transcript_raw = _transcript_from_payload(payload)
+    reps = _parse_positive_int(payload.get("reps"), default=1)
 
     if not isinstance(transcript_raw, str):
         transcript_raw = ""
@@ -304,16 +330,18 @@ def create_text():
         return error_response("VALIDATION_ERROR", "level is required", 400)
     if not transcript_raw:
         return error_response("VALIDATION_ERROR", "transcriptRaw is required", 400)
+    if reps is None:
+        return error_response("VALIDATION_ERROR", "reps must be a positive integer", 400)
 
     parsed_lines = _parse_transcript_lines(transcript_raw)
     db = get_db()
     try:
         cursor = db.execute(
             """
-            INSERT INTO texts(user_id, name, level, transcript_raw, line_count)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO texts(user_id, name, level, transcript_raw, line_count, reps)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (g.current_user["id"], name, level, transcript_raw, len(parsed_lines)),
+            (g.current_user["id"], name, level, transcript_raw, len(parsed_lines), reps),
         )
         text_id = cursor.lastrowid
         if text_id is None:
@@ -358,7 +386,8 @@ def update_text(text_id: int):
     payload = request.get_json(silent=True) or {}
     has_name = "name" in payload
     has_level = "level" in payload
-    if not has_name and not has_level:
+    has_reps = "reps" in payload
+    if not has_name and not has_level and not has_reps:
         return error_response("VALIDATION_ERROR", "No updatable fields provided", 400)
 
     current = _get_owned_text(text_id)
@@ -367,21 +396,24 @@ def update_text(text_id: int):
 
     name = _normalize_text(payload.get("name")) if has_name else current["name"]
     level = _normalize_text(payload.get("level")) if has_level else current["level"]
+    reps = _parse_positive_int(payload.get("reps")) if has_reps else int(current["reps"])
 
     if not name:
         return error_response("VALIDATION_ERROR", "name cannot be empty", 400)
     if not level:
         return error_response("VALIDATION_ERROR", "level cannot be empty", 400)
+    if reps is None:
+        return error_response("VALIDATION_ERROR", "reps must be a positive integer", 400)
 
     db = get_db()
     try:
         db.execute(
             """
             UPDATE texts
-            SET name = ?, level = ?, updated_at = datetime('now')
+            SET name = ?, level = ?, reps = ?, updated_at = datetime('now')
             WHERE id = ?
             """,
-            (name, level, text_id),
+            (name, level, reps, text_id),
         )
         db.commit()
     except sqlite3.IntegrityError:

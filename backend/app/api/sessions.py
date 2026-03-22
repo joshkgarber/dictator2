@@ -899,6 +899,8 @@ def create_session_event(session_id: int):
         points_delta = _get_scoring_rule(get_db(), "answer", fallback=10.0)
         details["line"] = {"index": clip_index, "text": expected_line["text"]}
     elif event_type == "keep":
+        if reps <= 1:
+            return error_response("VALIDATION_ERROR", "`keep` is not available here", 400)
         if rep_index is None:
             return error_response("CONFLICT", "Session has no active line", 409)
         if latest_attempt is None:
