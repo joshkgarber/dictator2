@@ -39,6 +39,7 @@ function buildText(): TextRecord {
     lineCount: 1,
     clipCount: 1,
     isReady: true,
+    reps: 1,
     schedule: {
       id: 70,
       nextSessionDate: "2030-04-01",
@@ -83,6 +84,7 @@ describe("TextsView scheduled date field", () => {
         name: "Interview Notes",
         level: "B1",
         isReady: true,
+        reps: 1,
       },
     });
   });

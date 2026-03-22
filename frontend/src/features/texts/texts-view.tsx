@@ -263,6 +263,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
           name: payload.name,
           level: payload.level,
           transcriptRaw: payload.transcriptRaw,
+          reps: payload.reps,
         });
 
         await upsertTextSchedule(created.id, payload.scheduledDate);
@@ -306,8 +307,8 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
       if (mode === "edit" && selectedText) {
         let changed = false;
 
-        if (selectedText.name !== payload.name || selectedText.level !== payload.level) {
-          await updateText(selectedText.id, { name: payload.name, level: payload.level });
+        if (selectedText.name !== payload.name || selectedText.level !== payload.level || selectedText.reps !== payload.reps) {
+          await updateText(selectedText.id, { name: payload.name, level: payload.level, reps: payload.reps });
           changed = true;
         }
 
