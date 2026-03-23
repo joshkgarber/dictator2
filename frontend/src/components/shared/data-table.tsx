@@ -16,6 +16,7 @@ type DataTableProps<T> = {
   rows: T[];
   getRowKey: (row: T) => string;
   actions?: ReactNode;
+  controls?: ReactNode;
   emptyMessage?: string;
 };
 
@@ -26,6 +27,7 @@ export function DataTable<T>({
   rows,
   getRowKey,
   actions,
+  controls,
   emptyMessage = "No records to display.",
 }: DataTableProps<T>) {
   return (
@@ -36,6 +38,11 @@ export function DataTable<T>({
           {subtitle && <p className="mt-1 text-sm text-slate-700">{subtitle}</p>}
         </div>
         {actions}
+      {controls && (
+        <div className="flex flex-shrink-0 flex-wrap items-center gap-2 bg-white px-4 py-2">
+          {controls}
+        </div>
+      )}
       </header>
 
       <div className="flex-1 overflow-y-auto">

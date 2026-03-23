@@ -382,59 +382,16 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
           <p className="mt-1 text-sm text-slate-700">Create, edit, validate, and delete texts before they enter scheduling and sessions.</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            Level
-            <select
-              value={levelFilter}
-              onChange={(event) => setLevelFilter(event.target.value as "ALL" | TextLevel)}
-              className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm"
-            >
-              <option value="ALL">All</option>
-              {TEXT_LEVELS.map((level) => (
-                <option key={level} value={level}>
-                  {level}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            Sort
-            <select
-              value={sortField}
-              onChange={(event) => setSortField(event.target.value as SortField)}
-              className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm"
-            >
-              <option value="updatedAt">Updated date</option>
-              <option value="name">Name</option>
-              <option value="level">Level</option>
-              <option value="lineCount">Line count</option>
-              <option value="clipCount">Clip count</option>
-              <option value="readiness">Readiness</option>
-            </select>
-          </label>
-
-          <Button
-            variant="outline"
-            onClick={() => setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))}
-            className="min-w-[110px]"
-          >
-            <ArrowDownUp className="mr-2 h-4 w-4" />
-            {sortDirection === "asc" ? "Ascending" : "Descending"}
-          </Button>
-
-          <Button
-            onClick={() => {
-              setSelectedTextId(null);
-              setDialogError(null);
-              setMode("new");
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New Text
-          </Button>
-        </div>
+        <Button
+          onClick={() => {
+            setSelectedTextId(null);
+            setDialogError(null);
+            setMode("new");
+          }}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          New Text
+        </Button>
       </header>
 
       {errorMessage && <p className="flex-shrink-0 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{errorMessage}</p>}
@@ -453,6 +410,51 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
             rows={rows}
             getRowKey={(row) => String(row.id)}
             emptyMessage="No texts yet. Create one to begin validation."
+            controls={
+              <>
+                <label className="flex items-center gap-2 text-sm text-slate-700">
+                  Level
+                  <select
+                    value={levelFilter}
+                    onChange={(event) => setLevelFilter(event.target.value as "ALL" | TextLevel)}
+                    className="h-8 rounded-md border border-slate-300 bg-white px-2 text-sm"
+                  >
+                    <option value="ALL">All</option>
+                    {TEXT_LEVELS.map((level) => (
+                      <option key={level} value={level}>
+                        {level}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="flex items-center gap-2 text-sm text-slate-700">
+                  Sort
+                  <select
+                    value={sortField}
+                    onChange={(event) => setSortField(event.target.value as SortField)}
+                    className="h-8 rounded-md border border-slate-300 bg-white px-2 text-sm"
+                  >
+                    <option value="updatedAt">Updated date</option>
+                    <option value="name">Name</option>
+                    <option value="level">Level</option>
+                    <option value="lineCount">Line count</option>
+                    <option value="clipCount">Clip count</option>
+                    <option value="readiness">Readiness</option>
+                  </select>
+                </label>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))}
+                  className="min-w-[110px]"
+                >
+                  <ArrowDownUp className="mr-2 h-4 w-4" />
+                  {sortDirection === "asc" ? "Ascending" : "Descending"}
+                </Button>
+              </>
+            }
           />
         </div>
       )}
