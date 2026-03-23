@@ -13,3 +13,4 @@ backend/.env
 frontend/.env
 .env
 drawio/
+docs/workflows
