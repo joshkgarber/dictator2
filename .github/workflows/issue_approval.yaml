@@ -14,7 +14,7 @@ jobs:
       - name: Check and process approval comment
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.DICTATOR2_ISSUE_APPROVAL_TOKEN }}
           script: |
             const issue = context.issue;
             const commentAuthor = context.payload.comment.user.login;
