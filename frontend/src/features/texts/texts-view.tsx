@@ -343,7 +343,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
       setSelectedTextId(null);
       setDialogError(null);
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      setDialogError(getErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
