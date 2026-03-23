@@ -235,41 +235,6 @@ def _load_session_events(session_id: int, *, limit: int = 200) -> list[dict]:
     return events
 
 
-def _load_tutor_feedback_history(session_id: int, *, limit: int = 10) -> list[dict]:
-    db = get_db()
-    rows = db.execute(
-        """
-        SELECT id, clip_index, attempt_text, line_text, model_name, response_json, created_at
-        FROM tutor_feedback
-        WHERE session_id = ?
-        ORDER BY id DESC
-        LIMIT ?
-        """,
-        (session_id, limit),
-    ).fetchall()
-
-    result = []
-    for row in rows:
-        # Parse the JSON response_json
-        response_json = row["response_json"]
-        try:
-            corrections = json.loads(response_json) if response_json else {"corrections": []}
-        except json.JSONDecodeError:
-            corrections = {"corrections": []}
-
-        result.append({
-            "id": int(row["id"]),
-            "clipIndex": int(row["clip_index"]),
-            "attemptText": row["attempt_text"],
-            "lineText": row["line_text"],
-            "modelName": row["model_name"],
-            "corrections": corrections.get("corrections", []),
-            "createdAt": row["created_at"],
-        })
-
-    return result
-
-
 def _latest_attempt_for_position(session_id: int, *, clip_index: int, rep_index: int):
     db = get_db()
     return db.execute(
@@ -1068,41 +1033,20 @@ def create_tutor_feedback(session_id: int):
         logger.exception("tutor_feedback_failed session_id=%s clip_index=%s", session_id, clip_index)
         return error_response("TUTOR_UNAVAILABLE", f"Tutor feedback is temporarily unavailable: {error}", 503)
 
-    # Serialize Corrections to JSON for storage
-    response_json = corrections.model_dump_json()
-
-    db = get_db()
-    insert_cursor = db.execute(
-        """
-        INSERT INTO tutor_feedback(
-          session_id,
-          clip_index,
-          attempt_text,
-          line_text,
-          model_name,
-          response_json
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (session_id, clip_index, attempt_text, expected_line["text"], model_name, response_json),
-    )
-    db.commit()
-
-    feedback_id = insert_cursor.lastrowid
-    if feedback_id is None:
-        return error_response("INTERNAL_ERROR", "Failed to save tutor feedback", 500)
+    # Note: Tutor responses are no longer persisted to database per optimization
+    # The feedback is returned immediately but not stored
 
     return jsonify(
         {
             "feedback": {
-                "id": int(feedback_id),
+                "id": 0,  # Not stored, so no persistent ID
                 "clipIndex": clip_index,
                 "attemptText": attempt_text,
                 "lineText": expected_line["text"],
                 "modelName": model_name,
                 "corrections": corrections.model_dump()["corrections"],
             },
-            "history": _load_tutor_feedback_history(session_id),
+            "history": [],  # No longer storing history
         }
     )
 
