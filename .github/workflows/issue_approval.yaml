@@ -1,0 +1,54 @@
+name: Issue Approval via Comment
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    if: github.event.issue.pull_request == null && startsWith(github.event.comment.body, '/approved')
+    permissions:
+      issues: write
+    steps:
+      - name: Check and process approval comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.issue;
+            const commentAuthor = context.payload.comment.user.login;
+            
+            // Optional: Check if user has permission (owner or specific role)
+            const userPermission = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: issue.owner,
+              repo: issue.repo,
+              username: commentAuthor
+            });
+            
+            if (!['admin', 'maintain', 'write'].includes(userPermission.data.permission)) {
+              console.log('User does not have permission to approve');
+              return;
+            }
+            
+            // Remove 'unapproved' label
+            try {
+              await github.rest.issues.removeLabel({
+                owner: issue.owner,
+                repo: issue.repo,
+                issue_number: issue.number,
+                name: 'unapproved'
+              });
+            } catch (error) {
+              console.log('Label "unapproved" not found');
+            }
+            
+            // Add 'approved' label
+            await github.rest.issues.addLabels({
+              owner: issue.owner,
+              repo: issue.repo,
+              issue_number: issue.number,
+              labels: ['approved']
+            });
+            
+            console.log(`Issue #${issue.number} approved by ${commentAuthor}`);
