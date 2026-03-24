@@ -3,7 +3,6 @@ name: Enhancement
 about: A feature or improvement to be implemented
 title: 'Clear, concise description - e.g., "Add dark mode toggle to settings"'
 labels: 'enhancement'
-assignees: ''
 
 ---
 
