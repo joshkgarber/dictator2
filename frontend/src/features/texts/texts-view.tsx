@@ -193,6 +193,13 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
     return [...filtered].sort((a, b) => compareTextRows(a, b, sortField, sortDirection));
   }, [levelFilter, sortDirection, sortField, texts]);
 
+  const emptyMessage = useMemo(() => {
+    if (texts.length === 0) {
+      return "No texts yet. Create one to begin validation.";
+    }
+    return `No texts at ${levelFilter} level`;
+  }, [texts.length, levelFilter]);
+
   const tableColumns: TableColumn<TextRecord>[] = useMemo(
     () => [
       {
@@ -418,7 +425,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
             columns={tableColumns}
             rows={rows}
             getRowKey={(row) => String(row.id)}
-            emptyMessage="No texts yet. Create one to begin validation."
+            emptyMessage={emptyMessage}
             controls={
               <>
                 <label className="flex items-center gap-2 text-sm text-slate-700">
