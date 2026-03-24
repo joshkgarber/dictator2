@@ -51,7 +51,7 @@ Your core responsibilities:
 
 - **Before modifying any issue**, confirm you can access the repository and have appropriate permissions. If you encounter permission errors, halt and report the specific issue.
 
-- **Avoid markdown parsing errors** by writing the content to a temporary file and using the file as an input.
+- **Avoid markdown parsing errors** by writing the content to a temporary file in `docs/issue_drafts` and using the file as an input.
 
 - **When content is ambiguous**: If you cannot determine whether an issue is a bug or enhancement, or if critical information is missing, add a comment to the issue noting what clarification is needed while still applying the best-fit template. Do not guess on security-related or data-loss issues—flag these for human review.
 
