@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import functools
-import hashlib
 import hmac
 import secrets
 from datetime import datetime, timedelta, timezone
 
 from flask import current_app, g, jsonify, request
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import get_db
 
@@ -16,29 +16,11 @@ def _utc_timestamp() -> int:
 
 
 def hash_password(password: str) -> str:
-    salt = secrets.token_hex(16)
-    digest = hashlib.pbkdf2_hmac(
-        "sha256",
-        password.encode("utf-8"),
-        salt.encode("utf-8"),
-        600000,
-    ).hex()
-    return f"pbkdf2_sha256${salt}${digest}"
+    return generate_password_hash(password)
 
 
 def verify_password(stored_hash: str, password: str) -> bool:
-    try:
-        _algorithm, salt, expected_digest = stored_hash.split("$", 2)
-    except ValueError:
-        return False
-
-    candidate_digest = hashlib.pbkdf2_hmac(
-        "sha256",
-        password.encode("utf-8"),
-        salt.encode("utf-8"),
-        600000,
-    ).hex()
-    return hmac.compare_digest(candidate_digest, expected_digest)
+    return check_password_hash(stored_hash, password)
 
 
 def error_response(code: str, message: str, status: int):
