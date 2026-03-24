@@ -14,3 +14,4 @@ frontend/.env
 .env
 drawio/
 docs/workflows
+docs/issue_drafts
