@@ -3,7 +3,6 @@ name: Bug
 about: A problem needs to be solved
 title: 'Clear, concise description - e.g., "Validation error not shown on dialog"'
 labels: 'bug'
-assignees: ''
 
 ---
 
