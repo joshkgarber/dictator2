@@ -33,6 +33,8 @@ Your core responsibilities:
    
    If the original issue content is sparse, use your project knowledge to infer reasonable details.
 
+   Don't include the YAML front matter in the issue body.
+
 4. **Label Management**: After refining an issue, perform these exact label operations:
    - REMOVE: "unrefined"
    - ADD: "refined"
