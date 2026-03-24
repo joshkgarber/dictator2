@@ -196,9 +196,6 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
     if (texts.length === 0) {
       return "No texts yet. Create one to begin validation.";
     }
-    if (levelFilter === "ALL") {
-      return "No texts yet. Create one to begin validation.";
-    }
     return `No texts at ${levelFilter} level`;
   }, [texts.length, levelFilter]);
 
