@@ -36,9 +36,10 @@ Transform a set of approved P0 GitHub issues into a well-structured master cycle
 ## Execution Protocol
 
 ### Phase 1: Issue Discovery and Analysis
-1. Query GitHub for all open issues with BOTH `P0` AND `approved` labels using: `gh issue list --label P0 --label approved --state open --json number,title,body,labels`
-2. For each issue, extract: issue number, title, description, any mentioned files/components, and any cross-references to other issues
-3. Validate that you have at least one issue to process; if zero issues found, halt and report: "No approved P0 issues found. Please verify labels and issue status."
+1. Familiarize yourself with the codebase
+2. Query GitHub for all open issues with BOTH `P0` AND `approved` labels using: `gh issue list --label P0 --label approved --state open --json number,title,body,labels`
+3. For each issue, extract: issue number, title, description, any mentioned files/components, and any cross-references to other issues
+4. Validate that you have at least one issue to process; if zero issues found, halt and report: "No approved P0 issues found. Please verify labels and issue status."
 
 ### Phase 2: Conflict Risk Assessment
 Analyze each pair of issues to determine merge conflict likelihood:
@@ -61,17 +62,15 @@ Analyze each pair of issues to determine merge conflict likelihood:
 Create an optimal execution strategy with one or more parallel streams:
 
 1. **Group issues into streams** based on conflict risk:
-   - The number of streams should be flexible - could be 1 stream, 2 streams, 3 streams, or more, based on natural groupings of issues
+   - There can be any number of streams — it depends on the grouping decisions of issues based on conflict risk
    - **High conflict risk issues go in the SAME stream** and are tackled **sequentially** to avoid integration conflicts
    - **Low/very low conflict risk issues go in DIFFERENT streams** enabling parallel execution
    - Each stream contains issues that should be worked on sequentially within that stream
    - Ensure low/very low conflict risk between streams so they can run in parallel
-   - Aim for balanced workload between streams (roughly equal issue counts when possible)
 
 2. **Establish sequential order within each stream**:
    - Order issues so each completes before the next starts
    - Consider logical dependencies (e.g., infrastructure before features that depend on it)
-   - Ensure minimal conflict risk between consecutive issues
 
 ### Phase 4: Master Issue Creation
 Create the cycle master issue with this exact structure in the body:
@@ -79,31 +78,19 @@ Create the cycle master issue with this exact structure in the body:
 ```markdown
 # Development Cycle Plan
 
-## Cycle Overview
-- **Created**: [ISO 8601 timestamp]
-- **Total Issues**: [count]
-- **Stream Strategy**: [N] parallel stream(s) with sequential execution within each stream
-
-## Stream [1]: [Stream Name]
+## Stream [1]
 Sequential order (high-conflict issues tackled sequentially):
-1. Issue #X - [Title] - [Conflict rationale: e.g., "Both touch auth module"]
-2. Issue #Y - [Title] - [Conflict rationale: e.g., "Modifies same service"]
+1. Issue #X - [Conflict rationale: e.g., "Both touch auth module"]
+2. Issue #Y - [Conflict rationale: e.g., "Modifies same service"]
 ...
 
-## Stream [2]: [Stream Name]
+## Stream [2]
 Sequential order (high-conflict issues tackled sequentially):
-1. Issue #X - [Title] - [Conflict rationale]
-2. Issue #Y - [Title] - [Conflict rationale]
+1. Issue #X - [Conflict rationale]
+2. Issue #Y - [Conflict rationale]
 ...
 
 [Repeat Stream sections for each additional stream as needed]
-
-## Conflict Assessment Summary
-- **Stream [1] internal conflicts**: [High - handled by sequential ordering]
-- **Stream [2] internal conflicts**: [High - handled by sequential ordering]
-[Repeat for each additional stream]
-- **Cross-stream conflicts**: [Low/Very Low - why streams can run in parallel]
-- **Strategy**: High-conflict issues grouped together and tackled sequentially; independent work parallelized across streams
 
 ## Execution Notes
 - Each stream handles high-conflict issues sequentially to avoid integration problems
@@ -115,7 +102,7 @@ Sequential order (high-conflict issues tackled sequentially):
 ```
 
 ### Phase 5: Label and Sub-Issue Management
-1. Create the issue with title format: `Cycle: [Brief Theme or Date Range] - [Issue Count] Issues`
+1. Create the issue with title format: `Cycle: [Brief Theme] - [Issue Count] Issues`
 2. Immediately add the `cycle` label: `gh issue edit [master-issue-number] --add-label cycle`
 3. Add the `unapproved` label: `gh issue edit [master-issue-number] --add-label unapproved`
 4. For each P0 approved issue, add as sub-issue: `gh sub-issue add [master-issue-number] [sub-issue-number]`
