@@ -107,15 +107,21 @@ function getErrorMessage(error: unknown): string {
   return "Request failed";
 }
 
+export type DialogErrors = {
+  name?: string;
+  clips?: string;
+  general?: string;
+};
+
 export type TextFormDialogProps = {
   open: boolean;
   mode: DialogMode;
   text: TextRecord | null;
   isSubmitting: boolean;
-  externalError: string | null;
+  externalError: DialogErrors | null;
   onClose: () => void;
   onSubmit: (payload: TextFormSubmitPayload) => void;
-  onClearExternalError: () => void;
+  onClearExternalError: (field?: keyof DialogErrors) => void;
   onSuccess?: () => void;
   onDelete?: () => void;
 };
@@ -289,11 +295,16 @@ export function TextFormDialog({
         )}
 
         <FormSection title="Metadata" description="Set core text identity before validating transcript and clips.">
-          <FormField label="Name" htmlFor="text-name">
+          <FormField label="Name" htmlFor="text-name" error={externalError?.name}>
             <input
               id="text-name"
               value={name}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => {
+                setName(event.target.value);
+                if (externalError?.name) {
+                  onClearExternalError("name");
+                }
+              }}
               className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
               placeholder="Radio interview transcript"
               required
@@ -438,6 +449,7 @@ export function TextFormDialog({
             label="Audio clips directory"
             htmlFor="text-clips"
             hint="Choose a folder with c-<index>.mp3 clips. Uploading clips updates existing indexes."
+            error={externalError?.clips}
           >
             <div className="flex flex-col gap-2">
               <label
@@ -454,7 +466,7 @@ export function TextFormDialog({
                   className="sr-only"
                   onChange={(event) => {
                     setClips(Array.from(event.target.files || []));
-                    onClearExternalError();
+                    onClearExternalError("clips");
                   }}
                   {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
                 />
@@ -470,9 +482,9 @@ export function TextFormDialog({
               </p>
             </div>
           </FormField>
-          {externalError && (
+          {externalError?.general && (
             <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-              {externalError}
+              {externalError.general}
             </p>
           )}
         </FormSection>

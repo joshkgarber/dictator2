@@ -7,13 +7,17 @@ type FormFieldProps = PropsWithChildren<{
   hint?: string;
   htmlFor?: string;
   className?: string;
+  error?: string;
 }>;
 
-export function FormField({ label, hint, htmlFor, className, children }: FormFieldProps) {
+export function FormField({ label, hint, htmlFor, className, error, children }: FormFieldProps) {
   return (
     <label htmlFor={htmlFor} className={cn("flex flex-col gap-1.5 text-sm", className)}>
       <span className="font-medium text-slate-700">{label}</span>
       {children}
+      {error && (
+        <span className="text-xs text-rose-600 font-medium">{error}</span>
+      )}
       {hint && <span className="text-xs text-slate-500">{hint}</span>}
     </label>
   );
