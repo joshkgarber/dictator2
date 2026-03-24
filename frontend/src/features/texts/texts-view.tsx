@@ -23,6 +23,7 @@ import {
   TextFormDialog,
   type DialogMode,
   type TextFormSubmitPayload,
+  type DialogErrors,
   getErrorMessage,
   toIsoDate,
 } from "./text-form-dialog";
@@ -127,7 +128,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
   const [sortField, setSortField] = useState<SortField>("updatedAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [readinessDetails, setReadinessDetails] = useState<Record<number, TextReadiness>>({});
-  const [dialogError, setDialogError] = useState<string | null>(null);
+  const [dialogError, setDialogError] = useState<DialogErrors | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -295,7 +296,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
             setTexts((prev) => [...prev, textWithSchedule]);
             setSelectedTextId(created.id);
             setMode("edit");
-            setDialogError(getErrorMessage(clipError));
+            setDialogError({ clips: getErrorMessage(clipError) });
             setIsSaving(false);
             return;
           }
@@ -322,7 +323,7 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
             await uploadTextClips(selectedText.id, payload.clips);
             changed = true;
           } catch (clipError) {
-            setDialogError(getErrorMessage(clipError));
+            setDialogError({ clips: getErrorMessage(clipError) });
             setIsSaving(false);
             return;
           }
@@ -343,7 +344,15 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
       setSelectedTextId(null);
       setDialogError(null);
     } catch (error) {
-      setDialogError(getErrorMessage(error));
+      const errorMessage = getErrorMessage(error);
+      // Check if this is a name-related error (e.g., duplicate name validation)
+      const isNameError = errorMessage.toLowerCase().includes("name") || 
+                         errorMessage.toLowerCase().includes("duplicate");
+      if (isNameError) {
+        setDialogError({ name: errorMessage });
+      } else {
+        setDialogError({ general: errorMessage });
+      }
     } finally {
       setIsSaving(false);
     }
@@ -475,7 +484,13 @@ export function TextsView({ openTextId = null, onOpenTextHandled }: TextsViewPro
         onSubmit={(payload) => {
           void upsertText(payload);
         }}
-        onClearExternalError={() => setDialogError(null)}
+        onClearExternalError={(field) => {
+          if (field) {
+            setDialogError((prev) => prev ? { ...prev, [field]: undefined } : null);
+          } else {
+            setDialogError(null);
+          }
+        }}
         onDelete={() => {
           setMode("delete");
         }}

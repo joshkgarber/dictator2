@@ -16,6 +16,7 @@ import {
 import {
   TextFormDialog,
   type TextFormSubmitPayload,
+  type DialogErrors,
   getErrorMessage,
 } from "@/features/texts/text-form-dialog";
 
@@ -194,7 +195,7 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedText, setSelectedText] = useState<TextRecord | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [dialogError, setDialogError] = useState<string | null>(null);
+  const [dialogError, setDialogError] = useState<DialogErrors | null>(null);
 
   const loadSchedule = useCallback(async () => {
     setIsLoading(true);
@@ -301,7 +302,7 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
           await uploadTextClips(selectedText.id, payload.clips);
           changed = true;
         } catch (clipError) {
-          setDialogError(getErrorMessage(clipError));
+          setDialogError({ clips: getErrorMessage(clipError) });
           setIsSaving(false);
           return;
         }
@@ -581,7 +582,13 @@ export function ScheduleView({ onStartNextSession }: ScheduleViewProps) {
         externalError={dialogError}
         onClose={handleDialogClose}
         onSubmit={handleTextSubmit}
-        onClearExternalError={() => setDialogError(null)}
+        onClearExternalError={(field) => {
+          if (field) {
+            setDialogError((prev) => prev ? { ...prev, [field]: undefined } : null);
+          } else {
+            setDialogError(null);
+          }
+        }}
       />
     </section>
   );
