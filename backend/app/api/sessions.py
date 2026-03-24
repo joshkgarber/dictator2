@@ -309,16 +309,30 @@ def _openai_tutor_response(*, text_body: str, line_text: str, attempt_text: str,
                     {
                         "role": "developer",
                         "content": (
-                            "You are a German language tutor. Compare the user's attempt with the correct answer. "
-                            "For EACH error the user makes, provide a separate, individual correction. "
+                            "You are a German language tutor. The user is practicing dictation by transcribing audio clips. "
+                            "For EACH error the user makes in their ATTEMPT, provide a separate, individual correction. "
                             "Do not combine multiple errors into a single correction response. "
-                            "Do not comment on first-word capitalization or minor punctuation differences, as these are acceptable."
+                            "Do not comment on first-word capitalization or minor punctuation differences, as these are acceptable. "
+                            "\n\n"
+                            "For each correction, you must provide:\n"
+                            "1. The specific error made\n"
+                            "2. A detailed explanation of WHY it is wrong - explain in full\n"
+                            "3. A takeaway the user can apply to future attempts\n"
+                            "\n"
+                            "When referencing grammar rules (cases, declensions, conjugations, etc.), always explain:\n"
+                            "- What the rule is\n"
+                            "- How it applies to this specific mistake\n"
+                            "- Why the correct form follows this rule\n"
+                            "\n"
+                            "Your explanations should be educational and help the user understand the underlying grammar principles. "
+                            "Always respond in English."
+                            "\n\n"
                             f"Follow the guidance of this statement to identify the particular errors being addressed in your response: {diff_context}"
                         ),
                     },
-                    {"role": "user", "content": f"This is the text I am currently studying: {text_body}"},
-                    {"role": "user", "content": f"This is the line which I got wrong: {line_text}"},
-                    {"role": "user", "content": f"My attempt to write the line from memory was: {attempt_text}"},
+                    {"role": "user", "content": f"FULL_TEXT (context): {text_body}"},
+                    {"role": "user", "content": f"CORRECT_LINE (authoritative answer - this is the exact transcript): {line_text}"},
+                    {"role": "user", "content": f"ATTEMPT (what the user wrote): {attempt_text}"},
                 ],
                 text_format=Corrections,
             )
