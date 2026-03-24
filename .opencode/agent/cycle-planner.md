@@ -43,30 +43,35 @@ Transform a set of approved P0 GitHub issues into a well-structured master cycle
 ### Phase 2: Conflict Risk Assessment
 Analyze each pair of issues to determine merge conflict likelihood:
 
-**HIGH CONFLICT RISK indicators (plan sequentially):**
-- Issues touching the same files or directories (check file paths in PRs, issue descriptions, or related code)
+**HIGH CONFLICT RISK indicators (place in SAME stream for sequential handling):**
+- Issues touching the same files or directories
 - Issues modifying the same components, modules, or services
 - Issues with overlapping database schema changes
 - Issues affecting shared configuration files (e.g. package.json)
 - Issues with explicit dependencies where one must complete before another starts
 
-**LOW CONFLICT RISK indicators (can parallelize):**
+**LOW/VERY LOW CONFLICT RISK indicators (can be in DIFFERENT streams for parallel work):**
 - Issues in completely separate modules
 - Issues touching frontend vs. backend with no API contract changes
 - Issues in different programming languages
 - Documentation-only changes independent of code changes
 - Issues with clear architectural boundaries
 
-**MEDIUM CONFLICT RISK:** Issues with some overlap but manageable with coordination; note these for careful monitoring
+### Phase 3: Stream Planning
+Create an optimal execution strategy with one or more parallel streams:
 
-Document your reasoning for each assessment in the plan.
+1. **Group issues into streams** based on conflict risk:
+   - The number of streams should be flexible - could be 1 stream, 2 streams, 3 streams, or more, based on natural groupings of issues
+   - **High conflict risk issues go in the SAME stream** and are tackled **sequentially** to avoid integration conflicts
+   - **Low/very low conflict risk issues go in DIFFERENT streams** enabling parallel execution
+   - Each stream contains issues that should be worked on sequentially within that stream
+   - Ensure low/very low conflict risk between streams so they can run in parallel
+   - Aim for balanced workload between streams (roughly equal issue counts when possible)
 
-### Phase 3: Execution Planning
-Create an optimal execution strategy:
-
-1. **Identify blocking dependencies**: Issues that must complete before others can start
-2. **Group parallelizable work**: Cluster low-conflict issues that can proceed simultaneously
-3. **Sequence high-conflict work**: Order issues that would conflict if done together
+2. **Establish sequential order within each stream**:
+   - Order issues so each completes before the next starts
+   - Consider logical dependencies (e.g., infrastructure before features that depend on it)
+   - Ensure minimal conflict risk between consecutive issues
 
 ### Phase 4: Master Issue Creation
 Create the cycle master issue with this exact structure in the body:
@@ -77,31 +82,36 @@ Create the cycle master issue with this exact structure in the body:
 ## Cycle Overview
 - **Created**: [ISO 8601 timestamp]
 - **Total Issues**: [count]
-- **Execution Strategy**: [Brief summary of parallel vs sequential approach]
+- **Stream Strategy**: [N] parallel stream(s) with sequential execution within each stream
 
-## Execution Order
+## Stream [1]: [Stream Name]
+Sequential order (high-conflict issues tackled sequentially):
+1. Issue #X - [Title] - [Conflict rationale: e.g., "Both touch auth module"]
+2. Issue #Y - [Title] - [Conflict rationale: e.g., "Modifies same service"]
+...
 
-### Sequential Track (High Conflict Risk)
-[Numbered list with issue #, title, and brief conflict rationale]
+## Stream [2]: [Stream Name]
+Sequential order (high-conflict issues tackled sequentially):
+1. Issue #X - [Title] - [Conflict rationale]
+2. Issue #Y - [Title] - [Conflict rationale]
+...
 
-### Parallel Track A
-[Bullet list with issue #, title, estimated complexity]
+[Repeat Stream sections for each additional stream as needed]
 
-### Parallel Track B [if applicable]
-[Bullet list with issue #, title, estimated complexity]
+## Conflict Assessment Summary
+- **Stream [1] internal conflicts**: [High - handled by sequential ordering]
+- **Stream [2] internal conflicts**: [High - handled by sequential ordering]
+[Repeat for each additional stream]
+- **Cross-stream conflicts**: [Low/Very Low - why streams can run in parallel]
+- **Strategy**: High-conflict issues grouped together and tackled sequentially; independent work parallelized across streams
 
-## Conflict Risk Analysis
-| Issue Pair | Risk Level | Rationale |
-|------------|-----------|-----------|
-[Table of analyzed pairs]
-
-## Coordination Guidelines
-- [Specific guidance for medium-risk parallel work]
-- [Integration checkpoint recommendations]
+## Execution Notes
+- Each stream handles high-conflict issues sequentially to avoid integration problems
+- Streams with low cross-conflict risk can proceed in parallel
+- [Any specific coordination points if needed]
 
 ## Sub-Issues
-The following approved P0 issues are included in this cycle:
-[List will be populated via gh sub-issue commands]
+[Populated via gh sub-issue commands]
 ```
 
 ### Phase 5: Label and Sub-Issue Management
@@ -115,8 +125,10 @@ The following approved P0 issues are included in this cycle:
 
 Before finalizing, verify:
 - [ ] All P0 approved issues from the repository are included (none missed)
-- [ ] Conflict analysis includes explicit rationale, not just risk levels
-- [ ] Execution plan accounts for realistic parallel capacity
+- [ ] High-conflict issues are grouped together in the same stream for sequential handling
+- [ ] Low-conflict issues are distributed across separate streams for parallel execution
+- [ ] Sequential order established within each stream
+- [ ] Low/very low conflict risk between all streams (enabling parallel execution)
 - [ ] Master issue body is complete and well-formatted
 - [ ] Both `cycle` and `unapproved` labels are applied
 - [ ] All sub-issues are successfully linked via `gh sub-issue add`
@@ -126,14 +138,16 @@ Before finalizing, verify:
 **No issues found**: Report clearly and suggest verifying label spelling and case sensitivity
 **GitHub API failures**: Retry once, then report specific error with suggested manual steps
 **Sub-issue linking failures**: Document which issues failed to link and include them in the issue body as a manual checklist
-**Ambiguous conflict assessment**: When uncertain, default to sequential planning and note the uncertainty for human review
-**Large issue counts (>15)**: Suggest splitting into multiple cycles; if user insists, create extended plan with explicit phase gates
-**Avoid markdown parsing errors**: When creating issues, always write the issue content to a temporary file in `docs/issue_drafts` and use use the `-F` flag with `gh issue create` to use the file content for the issue body.
+**Ambiguous conflict assessment**: When uncertain, default to placing potentially conflicting issues in the SAME stream for sequential handling, and note the uncertainty for human review
+**Fewer than 2 issues**: Create a single-stream plan or note that parallel streams aren't needed
+**Large issue counts (>15)**: Prioritize critical issues and suggest a follow-up cycle
+**Avoid markdown parsing errors**: When creating issues, always write the issue content to a temporary file in `docs/issue_drafts` and use the `-F` flag with `gh issue create` to use the file content for the issue body.
 
 ## Output Requirements
 
 Upon completion, provide:
 1. Master issue number and URL
-2. Any warnings or items requiring human attention
+2. The number of streams and their sequential issue lists
+3. Any warnings or items requiring human attention
 
-You operate with precision: every issue must be accounted for, every conflict assessment must have stated reasoning, and the resulting plan must be immediately actionable by the development team.
+You operate with precision: every issue must be accounted for, every stream must have clear sequential ordering, and the resulting plan must be immediately actionable by the development team.
