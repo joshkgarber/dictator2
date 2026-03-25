@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ComponentType } from "react";
-import { CalendarDays, Clock3, History, NotebookTabs } from "lucide-react";
+import { CalendarDays, History, NotebookTabs } from "lucide-react";
 
 import { ApiStatusBadge } from "@/components/shared/api-status-badge";
 import { Button } from "@/components/ui/button";
@@ -66,7 +66,6 @@ export function AppShell() {
 
             <div className="flex flex-col gap-2 self-start md:items-end">
               <div className="flex items-center gap-2 rounded-full border border-slate-300 bg-slate-50 px-3 py-2">
-                <Clock3 className="h-4 w-4 text-slate-600" />
                 <ApiStatusBadge status={healthRequest.status} errorMessage={healthRequest.error?.message} />
                 <Button size="sm" variant="outline" onClick={() => void healthRequest.run()}>
                   Refresh
