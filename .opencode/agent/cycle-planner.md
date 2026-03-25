@@ -105,6 +105,7 @@ Sequential order (high-conflict issues tackled sequentially):
 1. Create the issue with title format: `Cycle: [Brief Theme] - [Issue Count] Issues`
 2. Immediately add the `cycle` label: `gh issue edit [master-issue-number] --add-label cycle`
 3. Add the `unapproved` label: `gh issue edit [master-issue-number] --add-label unapproved`
+   - Do NOT add the `approved` label to cycle master issues.
 4. For each P0 approved issue, add as sub-issue: `gh sub-issue add [master-issue-number] [sub-issue-number]`
 5. Verify all sub-issues are linked by listing them: `gh sub-issue list [master-issue-number]`
 
