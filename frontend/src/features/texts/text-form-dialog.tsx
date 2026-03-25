@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LoaderCircle, Upload, FolderOpen } from "lucide-react";
 
 import { FormField, FormSection } from "@/components/shared/form-primitives";
@@ -138,6 +138,7 @@ export function TextFormDialog({
   onSuccess,
   onDelete,
 }: TextFormDialogProps) {
+  const generalErrorRef = useRef<HTMLParagraphElement>(null);
   const [name, setName] = useState(text?.name || "");
   const [level, setLevel] = useState<TextLevel>(text?.level || "B1");
   const [reps, setReps] = useState<number>(text?.reps || 1);
@@ -164,6 +165,14 @@ export function TextFormDialog({
     setScheduledDate(text?.schedule?.nextSessionDate || "");
     setLocalError(null);
   }, [open, text]);
+
+  useEffect(() => {
+    if (externalError?.general) {
+      setTimeout(() => {
+        generalErrorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    }
+  }, [externalError?.general]);
 
   async function handleTranscriptSelection(file: File | null) {
     setTranscriptFile(file);
@@ -484,7 +493,10 @@ export function TextFormDialog({
           </FormField>
         </FormSection>
         {externalError?.general && (
-          <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+          <p
+            ref={generalErrorRef}
+            className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
+          >
             {externalError.general}
           </p>
         )}
