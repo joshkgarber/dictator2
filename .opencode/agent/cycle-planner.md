@@ -76,8 +76,8 @@ Create an optimal execution strategy with one or more parallel streams:
    - Order issues so each completes before the next starts
    - Consider logical dependencies (e.g., infrastructure before features that depend on it)
 
-### Phase 4: Master Issue Creation
-Create the cycle master issue with this exact structure in the body:
+### Phase 4: Master Issue Drafting
+Draft the cycle master issue with this exact structure in the body:
 
 ```markdown
 # Development Cycle Plan
@@ -100,11 +100,6 @@ Sequential order (high-conflict issues tackled sequentially):
 - Each stream handles high-conflict issues sequentially to avoid integration problems
 - Streams with low cross-conflict risk can proceed in parallel
 - [Any specific coordination points if needed]
-
-## Sub-Issues
-- Stream issues are created as sub-issues to this master cycle issue
-- Each stream issue contains its work issues as sub-issues
-- Hierarchical structure: Master Cycle → Stream → Work Issues
 ```
 
 ### Phase 5: Master Issue and Stream Structure Creation
@@ -118,9 +113,10 @@ Create the hierarchical structure with master issue, stream sub-issues, and link
 
 2. **Create stream sub-issues for each unique stream**:
    - For each stream, create a sub-issue titled `Stream: [Stream Name]` (e.g., "Stream: Authentication & User Management")
-   - Add the `stream` label to each stream sub-issue
-   - Link each stream sub-issue to the master cycle issue using: `gh sub-issue add [master-issue-number] [stream-issue-number]`
    - Add a brief description to each stream issue explaining the sequential work order and conflict rationale
+   - Add the `stream` label to each stream sub-issue
+   - Add the `unapproved` label to each stream sub-issue
+   - Link each stream sub-issue to the master cycle issue using: `gh sub-issue add [master-issue-number] [stream-issue-number]`
 
 3. **Link work issues to their respective stream sub-issues**:
    - For each work issue in a stream, link it as a sub-issue to the stream issue: `gh sub-issue add [stream-issue-number] [work-issue-number]`
@@ -141,7 +137,7 @@ Before finalizing, verify:
 - [ ] Low/very low conflict risk between all streams (enabling parallel execution)
 - [ ] Master issue body is complete and well-formatted
 - [ ] Both `cycle` and `unapproved` labels are applied to master issue
-- [ ] Stream sub-issues created for each unique stream with `stream` label
+- [ ] Stream sub-issues created for each unique stream with `stream` and `unapproved` labels
 - [ ] All stream sub-issues are linked as sub-issues to the master cycle issue
 - [ ] All work issues are linked as sub-issues to their respective stream issues
 - [ ] Work issues linked in correct work sequence within each stream
@@ -162,9 +158,7 @@ Before finalizing, verify:
 
 Upon completion, provide:
 1. Master issue number and URL
-2. Stream sub-issue numbers and URLs for each stream created
-3. The number of streams and their sequential work issue lists
-4. Summary of hierarchical structure verification (streams linked to master, work issues linked to streams)
-5. Any warnings or items requiring human attention
+2. The number of streams
+3. Any warnings or items requiring human attention
 
 You operate with precision: every issue must be accounted for, every stream must have clear sequential ordering, and the resulting plan must be immediately actionable by the development team.
