@@ -1,0 +1,16 @@
+[Unit]
+Description=Dictator2 Stream Leader Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=streamleader
+Group=streamleader
+WorkingDirectory=/opt/dictator2
+EnvironmentFile=/etc/stream-leader.env
+ExecStart=/usr/bin/env python3 /opt/dictator2/stream-leader/stream_leader.py --repo OWNER/REPO
+Nice=10
+
+[Install]
+WantedBy=multi-user.target
