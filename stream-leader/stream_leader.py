@@ -88,94 +88,91 @@ def run_gh_json(args: list[str]) -> Any:
     return json.loads(output)
 
 
-def graphql(query: str, variables: dict[str, Any]) -> dict[str, Any]:
-    command = ["api", "graphql", "-f", f"query={query}"]
-    for key, value in variables.items():
-        if value is None:
+def fetch_issue_parent(repo: str, issue_number: int) -> dict[str, Any] | None:
+    """Fetch the parent issue for a given issue using REST API."""
+    try:
+        parent = run_gh_json(
+            ["api", f"repos/{repo}/issues/{issue_number}/parent"]
+        )
+        return parent if isinstance(parent, dict) else None
+    except GitHubCLIError:
+        return None
+
+
+def fetch_issue_sub_issues(repo: str, issue_number: int) -> list[dict[str, Any]]:
+    """Fetch open sub-issues for a given issue using REST API."""
+    try:
+        sub_issues = run_gh_json(
+            ["api", f"repos/{repo}/issues/{issue_number}/sub_issues?state=open"]
+        )
+        if isinstance(sub_issues, list):
+            return sub_issues
+        return []
+    except GitHubCLIError:
+        return []
+
+
+def fetch_open_approved_stream_issues(repo: str) -> list[StreamIssue]:
+    """Fetch open issues with 'stream' and 'approved' labels."""
+    # Use gh issue list with labels filter
+    issues_data = run_gh_json(
+        [
+            "issue",
+            "list",
+            "--repo",
+            repo,
+            "--label",
+            "stream",
+            "--label",
+            "approved",
+            "--state",
+            "open",
+            "--limit",
+            "100",
+            "--json",
+            "number,url",
+        ]
+    )
+
+    if not isinstance(issues_data, list):
+        return []
+
+    stream_issues: list[StreamIssue] = []
+    for issue in issues_data:
+        if not isinstance(issue, dict):
             continue
-        command.extend(["-F", f"{key}={value}"])
-    payload = run_gh_json(command)
-    if not isinstance(payload, dict):
-        raise GitHubCLIError("Unexpected GraphQL response shape")
-    if payload.get("errors"):
-        raise GitHubCLIError(f"GraphQL returned errors: {payload['errors']}")
-    data = payload.get("data")
-    if not isinstance(data, dict):
-        raise GitHubCLIError("Missing GraphQL data payload")
-    return data
 
+        issue_number = issue.get("number")
+        if not issue_number:
+            continue
 
-def fetch_open_approved_stream_issues(owner: str, repo: str) -> list[StreamIssue]:
-    query = """
-query($owner: String!, $repo: String!, $cursor: String) {
-  repository(owner: $owner, name: $repo) {
-    issues(
-      first: 50,
-      after: $cursor,
-      states: [OPEN],
-      labels: ["stream", "approved"],
-      orderBy: {field: UPDATED_AT, direction: ASC}
-    ) {
-      nodes {
-        number
-        url
-        parent {
-          number
-          labels(first: 50) {
-            nodes {
-              name
-            }
-          }
-        }
-        subIssues(first: 100) {
-          nodes {
-            number
-            url
-            state
-          }
-        }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-    }
-  }
-}
-"""
-    issues: list[StreamIssue] = []
-    cursor: str | None = None
+        # Fetch parent and sub-issues for each stream issue
+        parent = fetch_issue_parent(repo, issue_number)
+        sub_issues = fetch_issue_sub_issues(repo, issue_number)
 
-    while True:
-        data = graphql(query=query, variables={"owner": owner, "repo": repo, "cursor": cursor})
-        repo_data = data.get("repository") or {}
-        connection = repo_data.get("issues") or {}
-        for raw_issue in connection.get("nodes") or []:
-            parent = raw_issue.get("parent")
-            parent_labels = {
-                label["name"]
-                for label in ((parent or {}).get("labels") or {}).get("nodes", [])
-                if isinstance(label, dict) and label.get("name")
-            }
-            open_sub_issues = [
-                sub_issue
-                for sub_issue in (raw_issue.get("subIssues") or {}).get("nodes", [])
-                if (sub_issue or {}).get("state") == "OPEN"
-            ]
-            issues.append(
-                StreamIssue(
-                    number=raw_issue["number"],
-                    url=raw_issue["url"],
-                    parent_number=(parent or {}).get("number"),
-                    parent_labels=parent_labels,
-                    open_sub_issues=open_sub_issues,
-                )
+        parent_labels = set()
+        parent_number = None
+        if parent and isinstance(parent, dict):
+            parent_number = parent.get("number")
+            parent_labels_data = parent.get("labels", [])
+            if isinstance(parent_labels_data, list):
+                parent_labels = {
+                    label.get("name", "")
+                    for label in parent_labels_data
+                    if isinstance(label, dict) and label.get("name")
+                }
+
+        stream_issues.append(
+            StreamIssue(
+                number=issue_number,
+                url=issue.get("url", ""),
+                parent_number=parent_number,
+                parent_labels=parent_labels,
+                open_sub_issues=sub_issues,
             )
+        )
 
-        page_info = connection.get("pageInfo") or {}
-        if not page_info.get("hasNextPage"):
-            return issues
-        cursor = page_info.get("endCursor")
+    return stream_issues
 
 
 def close_stream_issue(repo: str, issue_number: int, dry_run: bool) -> None:
@@ -257,15 +254,6 @@ def has_related_pull_request(repo: str, issue_number: int) -> bool:
     return False
 
 
-def split_repo(repo: str) -> tuple[str, str]:
-    if "/" not in repo:
-        raise ValueError("Repository must be in OWNER/REPO format")
-    owner, name = repo.split("/", 1)
-    if not owner or not name:
-        raise ValueError("Repository must be in OWNER/REPO format")
-    return owner, name
-
-
 def should_repost_comment(
     previous_comment: dict[str, Any], cooldown_minutes: int
 ) -> bool:
@@ -282,12 +270,6 @@ def main() -> int:
         logging.error("Missing repository. Use --repo or set GITHUB_REPOSITORY.")
         return 2
 
-    try:
-        owner, repo_name = split_repo(args.repo)
-    except ValueError as error:
-        logging.error("%s", error)
-        return 2
-
     counters = {
         "streams_seen": 0,
         "streams_skipped_parent_unapproved": 0,
@@ -298,7 +280,7 @@ def main() -> int:
     }
 
     try:
-        stream_issues = fetch_open_approved_stream_issues(owner=owner, repo=repo_name)
+        stream_issues = fetch_open_approved_stream_issues(repo=args.repo)
         counters["streams_seen"] = len(stream_issues)
         logging.info("Processing %s approved stream issues", len(stream_issues))
 
