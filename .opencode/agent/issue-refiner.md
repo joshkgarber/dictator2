@@ -51,6 +51,8 @@ Your core responsibilities:
 
 **Operational Protocols:**
 
+- **Use the comments flag** `--comments` when viewing GitHub issues e.g. `gh issue view <number> --comments`
+
 - **Before modifying any issue**, confirm you can access the repository and have appropriate permissions. If you encounter permission errors, halt and report the specific issue.
 
 - **Avoid markdown parsing errors** by writing the content to a temporary file in `docs/issue_drafts` and using the file as an input.
