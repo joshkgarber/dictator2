@@ -59,3 +59,7 @@ The repository includes an automation script for stream issue workflow managemen
 - Systemd examples:
   - `stream-leader/stream-leader.service.example`
   - `stream-leader/stream-leader.timer.example`
+
+## Workflow Documentation
+
+- [Issue Lifecycle Workflow](docs/workflow/issue-lifecycle.md) - Complete guide to the 6-phase issue workflow
