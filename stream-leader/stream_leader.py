@@ -233,22 +233,17 @@ def add_work_comment(repo: str, issue_number: int, dry_run: bool) -> None:
 
 
 def has_related_pull_request(repo: str, issue_number: int) -> bool:
-    """Check if an issue has related pull request activity using GraphQL."""
+    """Check if an issue has an open related pull request using GraphQL."""
     owner, name = repo.split("/", 1)
     query = """
     query($owner: String!, $name: String!, $number: Int!) {
       repository(owner: $owner, name: $name) {
         issue(number: $number) {
-          timelineItems(first: 100, itemTypes: [CONNECTED_EVENT]) {
+          closedByPullRequestsReferences(first: 100) {
             nodes {
-              ... on ConnectedEvent {
-                subject {
-                  ... on PullRequest {
-                    number
-                    url
-                  }
-                }
-              }
+              number
+              state
+              url
             }
           }
         }
@@ -268,15 +263,13 @@ def has_related_pull_request(repo: str, issue_number: int) -> bool:
         data = result.get("data", {})
         repository = data.get("repository", {})
         issue = repository.get("issue", {})
-        timeline_items = issue.get("timelineItems", {})
-        nodes = timeline_items.get("nodes", [])
+        closed_by_prs = issue.get("closedByPullRequestsReferences", {})
+        nodes = closed_by_prs.get("nodes", [])
         if not isinstance(nodes, list):
             return False
-        for event in nodes:
-            if not isinstance(event, dict):
-                continue
-            subject = event.get("subject")
-            if isinstance(subject, dict) and subject.get("number"):
+        # Check if any of the PRs are still open
+        for pr in nodes:
+            if isinstance(pr, dict) and pr.get("state") == "OPEN":
                 return True
         return False
     except GitHubCLIError:
