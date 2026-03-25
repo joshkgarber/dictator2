@@ -43,7 +43,7 @@ python stream-leader/stream_leader.py --repo OWNER/REPO --dry-run --log-level DE
 
 ## Configuration
 
-- `STREAM_LEADER_REMINDER_COOLDOWN_MINUTES` (default: `240`)
+- `STREAM_LEADER_REMINDER_COOLDOWN_MINUTES` (default: `20`)
   - Minimum age of the latest `\ocjr work on this issue` comment before adding another reminder when no related PR exists.
 
 ## Systemd setup
@@ -66,5 +66,5 @@ Example `/etc/stream-leader.env`:
 
 ```bash
 GH_TOKEN=YOUR_TOKEN_HERE
-STREAM_LEADER_REMINDER_COOLDOWN_MINUTES=240
+STREAM_LEADER_REMINDER_COOLDOWN_MINUTES=20
 ```
