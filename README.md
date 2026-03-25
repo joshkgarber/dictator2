@@ -49,3 +49,13 @@ Frontend runs at `http://localhost:5173` and backend runs at `http://localhost:5
 - Dev server: `npm --prefix frontend run dev`
 - Build: `npm --prefix frontend run build`
 - Preview build: `npm --prefix frontend run preview`
+
+## Stream leader agent
+
+The repository includes an automation script for stream issue workflow management:
+
+- Script: `stream-leader/stream_leader.py`
+- Docs and setup: `stream-leader/README.md`
+- Systemd examples:
+  - `stream-leader/stream-leader.service.example`
+  - `stream-leader/stream-leader.timer.example`

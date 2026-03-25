@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Dictator2 Stream Leader every 10 minutes during business hours
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 09..16:00/10
+Persistent=true
+Unit=stream-leader.service
+
+[Install]
+WantedBy=timers.target
