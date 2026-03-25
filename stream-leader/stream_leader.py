@@ -233,25 +233,54 @@ def add_work_comment(repo: str, issue_number: int, dry_run: bool) -> None:
 
 
 def has_related_pull_request(repo: str, issue_number: int) -> bool:
-    timeline = run_gh_json(
-        [
-            "api",
-            f"repos/{repo}/issues/{issue_number}/timeline?per_page=100",
-            "-H",
-            "Accept: application/vnd.github+json",
-        ]
-    )
-    if not isinstance(timeline, list):
+    """Check if an issue has related pull request activity using GraphQL."""
+    owner, name = repo.split("/", 1)
+    query = """
+    query($owner: String!, $name: String!, $number: Int!) {
+      repository(owner: $owner, name: $name) {
+        issue(number: $number) {
+          timelineItems(first: 100, itemTypes: [CROSS_REFERENCED_EVENT]) {
+            nodes {
+              ... on CrossReferencedEvent {
+                source {
+                  ... on PullRequest {
+                    number
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+    try:
+        result = run_gh_json([
+            "api", "graphql",
+            "-F", f"owner={owner}",
+            "-F", f"name={name}",
+            "-F", f"number={issue_number}",
+            "-f", f"query={query}"
+        ])
+        if not isinstance(result, dict):
+            return False
+        data = result.get("data", {})
+        repository = data.get("repository", {})
+        issue = repository.get("issue", {})
+        timeline_items = issue.get("timelineItems", {})
+        nodes = timeline_items.get("nodes", [])
+        if not isinstance(nodes, list):
+            return False
+        for event in nodes:
+            if not isinstance(event, dict):
+                continue
+            source = event.get("source")
+            if isinstance(source, dict) and source.get("number"):
+                return True
         return False
-
-    for event in timeline:
-        if event.get("event") != "cross-referenced":
-            continue
-        source_issue = ((event.get("source") or {}).get("issue") or {})
-        pull_request_ref = source_issue.get("pull_request")
-        if isinstance(pull_request_ref, dict) and pull_request_ref.get("html_url"):
-            return True
-    return False
+    except GitHubCLIError:
+        return False
 
 
 def should_repost_comment(
