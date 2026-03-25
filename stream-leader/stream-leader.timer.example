@@ -1,0 +1,18 @@
+[Unit]
+Description=Run Stream Leader Agent every 10 minutes during business hours
+Documentation=https://github.com/joshkgarber/dictator2/tree/main/stream-leader
+
+[Timer]
+# Run every 10 minutes
+OnCalendar=*-*-* 09..16:00/10:00
+
+# Run immediately when timer is activated (for testing)
+# OnBootSec=1min
+# OnUnitActiveSec=10min
+
+# Only run during business hours (9am-5pm)
+# The service will also check internally, but this prevents unnecessary wakeups
+Persistent=true
+
+[Install]
+WantedBy=timers.target

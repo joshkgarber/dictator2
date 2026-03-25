@@ -1,0 +1,33 @@
+[Unit]
+Description=Stream Leader Agent - GitHub Issue Workflow Manager
+Documentation=https://github.com/joshkgarber/dictator2/tree/main/stream-leader
+After=network.target
+
+[Service]
+Type=oneshot
+User=streamleader
+Group=streamleader
+
+# Working directory and script
+WorkingDirectory=/opt/stream-leader
+ExecStart=/usr/bin/python3 /opt/stream-leader/stream_leader.py
+
+# Environment variables
+Environment="GITHUB_TOKEN=ghp_your_token_here"
+Environment="GITHUB_REPO=owner/repo"
+Environment="PYTHONUNBUFFERED=1"
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=stream-leader
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/stream-leader
+
+[Install]
+WantedBy=multi-user.target
