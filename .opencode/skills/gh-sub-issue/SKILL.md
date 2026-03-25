@@ -22,7 +22,7 @@ gh extension install yahsan2/gh-sub-issue
 gh sub-issue add <parent-issue-number> <issue-number>
 ```
 
-Example: `gh sub-issue add 100 456` links issue 456 as sub-issue of 100
+Example: `gh sub-issue add 100 456` links issue #456 as sub-issue of #100
 
 ### List sub-issues
 
@@ -30,7 +30,7 @@ Example: `gh sub-issue add 100 456` links issue 456 as sub-issue of 100
 gh sub-issue list <parent-issue-number> [--json number,title,state]
 ```
 
-Example: `gh sub-issue list 100` shows all sub-issues of issue 100
+Example: `gh sub-issue list 100` shows all sub-issues of issue #100
 
 ### Remove sub-issue link
 
@@ -38,7 +38,7 @@ Example: `gh sub-issue list 100` shows all sub-issues of issue 100
 gh sub-issue remove <parent-issue-number> <issue-number>
 ```
 
-Example: `gh sub-issue remove 100 456` unlinks 456 from 100
+Example: `gh sub-issue remove 100 456` unlinks #456 from #100
 
 ## Key Flags
 
