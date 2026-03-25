@@ -13,8 +13,8 @@ import sys
 from dataclasses import dataclass
 from typing import Any
 
-WORK_COMMENT = r"\ocjr work on this issue"
-DEFAULT_REMINDER_COOLDOWN_MINUTES = 240
+WORK_COMMENT = "/ocjr work on this issue"
+DEFAULT_REMINDER_COOLDOWN_MINUTES = 20
 
 
 class GitHubCLIError(RuntimeError):
@@ -239,10 +239,10 @@ def has_related_pull_request(repo: str, issue_number: int) -> bool:
     query($owner: String!, $name: String!, $number: Int!) {
       repository(owner: $owner, name: $name) {
         issue(number: $number) {
-          timelineItems(first: 100, itemTypes: [CROSS_REFERENCED_EVENT]) {
+          timelineItems(first: 100, itemTypes: [CONNECTED_EVENT]) {
             nodes {
-              ... on CrossReferencedEvent {
-                source {
+              ... on ConnectedEvent {
+                subject {
                   ... on PullRequest {
                     number
                     url
@@ -275,8 +275,8 @@ def has_related_pull_request(repo: str, issue_number: int) -> bool:
         for event in nodes:
             if not isinstance(event, dict):
                 continue
-            source = event.get("source")
-            if isinstance(source, dict) and source.get("number"):
+            subject = event.get("subject")
+            if isinstance(subject, dict) and subject.get("number"):
                 return True
         return False
     except GitHubCLIError:
