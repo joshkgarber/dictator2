@@ -4,7 +4,7 @@ This document describes the complete lifecycle of issues in this repository, fro
 
 ## Overview
 
-The workflow consists of **6 phases** designed to transform raw ideas and bug reports into structured, approved, and completed work items. The workflow balances human oversight (Owner) with automated assistance (Agents) to ensure quality while maintaining efficiency.
+The workflow consists of **6 phases** designed to transform raw ideas and bug reports into structured, approved, and completed work items. The workflow combines human oversight (Owner) with automated assistance (Agents).
 
 ### Workflow Phases at a Glance
 
@@ -20,8 +20,9 @@ The workflow consists of **6 phases** designed to transform raw ideas and bug re
 │  Phase 6    │◀────│  Phase 5    │◀────│  Phase 4    │
 │  Stream     │     │  Cycle      │     │  Cycle      │
 │  Leadership │     │  Approval   │     │  Planning   │
-│  (Agent)    │     │  (Owner)    │     │  (Agent)    │
-└─────────────┘     └─────────────┘     └─────────────┘
+│  (Agent &   |     |  (Owner)    |     |  (Agent)    |
+|  Owner)     │     └─────────────┘     └─────────────┘
+└─────────────┘
 ```
 
 ---
@@ -39,8 +40,9 @@ The workflow consists of **6 phases** designed to transform raw ideas and bug re
 1. Create a new GitHub issue describing the bug or enhancement
 2. Provide initial description of the problem or feature
 3. Include any screenshots, recordings, or supporting context
-4. Assign **P0|P1|P2|PX** label to indicate priority
+4. Assign **P0** or **P1** or **P2** or **PX** label to indicate priority
 5. Assign **unrefined** label to signal the issue needs processing
+6. Assign **P0** to issues to include them in the next cycle
 
 ### Exit Criteria
 - Issue has **P0** label
@@ -50,7 +52,7 @@ The workflow consists of **6 phases** designed to transform raw ideas and bug re
 ### Output
 A raw issue with:
 - Basic title and description
-- **P0|P1|P2|PX** priority label
+- **P0** priority label
 - **unrefined** status label
 
 ---
@@ -75,11 +77,7 @@ The Issue Refiner Agent queries for unrefined P0 issues, determines whether each
 - Issue body follows appropriate template
 
 ### Output
-An actionable, well-structured issue with:
-- Complete template sections filled
-- Clear acceptance criteria
-- Defined testing steps
-- Proper categorization (bug/enhancement)
+An set of well-drafted, well-structured issues.
 
 ---
 
@@ -105,9 +103,7 @@ An actionable, well-structured issue with:
 - `/approved` comment posted by Owner
 
 ### Output
-An approved issue ready for cycle planning with:
-- **approved** label
-- Owner's approval comment
+Actionable and approved issues ready for cycle planning.
 
 ---
 
@@ -129,18 +125,14 @@ The Cycle Planner Agent queries for approved P0 issues, analyzes conflict risks 
 - All approved P0 issues linked to appropriate streams
 
 ### Output
-Complete cycle structure:
-- Master cycle issue with overview
-- Stream sub-issues with sequential order
-- Work issues linked in execution order
-- All issues labeled appropriately
+A Complete cycle structure with a master cycle issue, its stream sub-issues, and their work sub-issues linked in execution order.
 
 ---
 
 ## Phase 5: Cycle Approval
 
 **Responsible:** Owner  
-**Purpose:** Review and approve cycle and stream structure before work begins
+**Purpose:** Review and approve cycle and stream issues before work begins
 
 ### Entry Criteria
 - Cycle issue created with `cycle` + `unapproved` labels
@@ -159,23 +151,16 @@ Complete cycle structure:
 
 3. **Approve Each Stream**:
    - Comment `/approved` on each stream sub-issue
-   - **unapproved** label removed, **approved** label added on each stream
 
 4. **Approve Cycle**:
    - Comment `/approved` on the master cycle issue
-   - **unapproved** label removed, **approved** label added
 
 ### Exit Criteria
-- `/approved` comment on master cycle issue
-- `/approved` comment on ALL stream sub-issues
 - **unapproved** labels removed from cycle and all streams
 - **approved** labels added to cycle and all streams
 
 ### Output
-Approved cycle ready for execution:
-- Master cycle issue with **approved** label
-- All stream issues with **approved** labels
-- Clear signal that work can begin
+Approved cycle ready for execution.
 
 ### Important Notes
 - **Work cannot begin until this approval is complete**
@@ -195,7 +180,6 @@ Approved cycle ready for execution:
 - Stream issues with **approved** labels
 
 ### Work Performed
-
 The stream leader triggers work to start on work issues. The owner reviews PRs and merges changes.
 
 ### Exit Criteria
@@ -294,8 +278,6 @@ Phase 6: Stream Leadership
 The `/approved` comment is the Owner's signal that that the issue is ready to be included in the next phase:
 
 1. **Phase 3** - Owner comments `/approved` on refined issues
-   - Removes `unapproved` label
-   - Adds `approved` label
    - Signals ready for cycle planning
 
 2. **Phase 5** - Owner comments `/approved` on:
@@ -303,7 +285,7 @@ The `/approved` comment is the Owner's signal that that the issue is ready to be
    - Each individual stream sub-issue
    - Required on ALL streams before work can begin
 
-The comment serves as both documentation of approval and trigger for automated label updates.
+The comment serves as both documentation of approval and trigger for automated label updates. (See `.github/workflows/issue_approval.yaml`.)
 
 ---
 
