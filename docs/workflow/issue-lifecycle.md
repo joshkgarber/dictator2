@@ -65,22 +65,7 @@ A raw issue with:
 - Issue has **P0** + **unrefined** labels
 
 ### Work Performed
-1. **Query** for issues with `P0` AND `unrefined` labels
-2. **Analyze** the issue to determine if it's a bug or enhancement
-3. **Apply Template** based on determination:
-   - Bug: Use `.github/ISSUE_TEMPLATE/bug.md`
-   - Enhancement: Use `.github/ISSUE_TEMPLATE/enhancement.md`
-4. **Structure Content**:
-   - Fill in all relevant sections
-   - Preserve original intent and information
-   - Add missing details based on project knowledge
-   - Use project-appropriate terminology
-5. **Update Labels**:
-   - REMOVE: `unrefined`
-   - ADD: `refined`
-   - ADD: `unapproved`
-   - ADD: `bug` OR `enhancement` (as appropriate)
-   - KEEP: `P0`
+The Issue Refiner Agent queries for unrefined P0 issues, determines whether each is a bug or enhancement, applies the appropriate template, structures the content with complete sections, and updates labels to mark the issue as refined and unapproved while preserving P0 priority.
 
 ### Exit Criteria
 - **unrefined** label removed
@@ -136,49 +121,7 @@ An approved issue ready for cycle planning with:
 - Issues have **P0** + **refined** + **approved** labels
 
 ### Work Performed
-
-#### 1. Issue Discovery
-Query for all open issues with `P0` AND `approved` labels
-
-#### 2. Conflict Risk Assessment
-Analyze each issue pair for merge conflict likelihood:
-
-**HIGH CONFLICT RISK** (same stream, sequential):
-- Issues touching same files/directories
-- Issues modifying same components
-- Issues with overlapping database schema changes
-- Issues affecting shared configuration files
-- Issues with explicit dependencies
-
-**LOW CONFLICT RISK** (different streams, parallel):
-- Issues in separate modules
-- Frontend vs backend with no API contract changes
-- Documentation-only changes
-- Issues with clear architectural boundaries
-
-#### 3. Stream Planning
-Create execution strategy with parallel streams:
-- Group high-conflict issues into SAME stream (sequential execution)
-- Distribute low-conflict issues across DIFFERENT streams (parallel execution)
-- Establish sequential order within each stream
-
-#### 4. Hierarchical Structure Creation
-
-**Master Cycle Issue:**
-- Title format: `Cycle: [Brief Theme] - [Issue Count] Issues`
-- Labels: `cycle`, `unapproved`
-- Body with stream breakdown and execution notes
-
-**Stream Sub-Issues:**
-- Title format: `Stream: [Stream Name]`
-- Labels: `stream`, `unapproved`
-- Description of sequential work order
-- Linked as sub-issues to master cycle issue using `gh sub-issue add`
-
-**Work Issue Linking:**
-- Link work issues as sub-issues to their stream issues
-- Link in execution order (first to last)
-- Creates hierarchy: Master → Stream → Work Issues
+The Cycle Planner Agent queries for approved P0 issues, analyzes conflict risks between issue pairs, groups them into sequential streams for parallel execution, and creates a hierarchical structure with a master cycle issue, stream sub-issues, and linked work issues in execution order.
 
 ### Exit Criteria
 - Master cycle issue created with `cycle` + `unapproved` labels
