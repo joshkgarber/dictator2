@@ -96,11 +96,6 @@ An actionable, well-structured issue with:
 - Defined testing steps
 - Proper categorization (bug/enhancement)
 
-### Error Handling
-- Skip issues already having `refined` or `unapproved` labels
-- Add comment requesting clarification if issue is ambiguous
-- Flag security-related or data-loss issues for human review
-
 ---
 
 ## Phase 3: Issue Approval
