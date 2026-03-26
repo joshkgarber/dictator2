@@ -112,8 +112,7 @@ An actionable, well-structured issue with:
    - Completeness of acceptance criteria
    - Feasibility of implementation
    - Alignment with project goals
-2. If approved, comment `/approved` on the issue
-3. If not approved, provide feedback for further refinement
+2. Once approved, comment `/approved` on the issue
 
 ### Exit Criteria (On Approval)
 - **unapproved** label removed
@@ -125,23 +124,16 @@ An approved issue ready for cycle planning with:
 - **approved** label
 - Owner's approval comment
 
-### Alternative Exit (Rejection)
-If the issue is not approved:
-- Owner provides feedback in comments
-- Issue may return to Phase 2 for additional refinement
-- Or issue may be closed if no longer relevant
-
 ---
 
 ## Phase 4: Cycle Planning
 
 **Responsible:** Cycle Planner Agent  
 **Purpose:** Group approved issues into executable cycles with conflict-aware organization  
-**Agent Reference:** [Cycle Planner Agent](../.opencode/agent/cycle-planner.md)
+**Agent Reference:** `.opencode/agent/cycle-planner.md`
 
 ### Entry Criteria
 - Issues have **P0** + **refined** + **approved** labels
-- No existing cycle assignment
 
 ### Work Performed
 
@@ -192,7 +184,6 @@ Create execution strategy with parallel streams:
 - Master cycle issue created with `cycle` + `unapproved` labels
 - Stream sub-issues created with `stream` + `unapproved` labels
 - All approved P0 issues linked to appropriate streams
-- Hierarchical structure verified with `gh sub-issue list`
 
 ### Output
 Complete cycle structure:
@@ -200,9 +191,6 @@ Complete cycle structure:
 - Stream sub-issues with sequential order
 - Work issues linked in execution order
 - All issues labeled appropriately
-
-### Tool Integration
-Uses `gh-sub-issue` extension for managing sub-issue relationships. See [gh-sub-issue Skill](../.opencode/skills/gh-sub-issue/SKILL.md) for command reference.
 
 ---
 
@@ -226,13 +214,13 @@ Uses `gh-sub-issue` extension for managing sub-issue relationships. See [gh-sub-
    - Verify completeness of stream description
    - Check work issue assignments
 
-3. **Approve Cycle**:
-   - Comment `/approved` on the master cycle issue
-   - **unapproved** label removed, **approved** label added
-
-4. **Approve Each Stream**:
+3. **Approve Each Stream**:
    - Comment `/approved` on each stream sub-issue
    - **unapproved** label removed, **approved** label added on each stream
+
+4. **Approve Cycle**:
+   - Comment `/approved` on the master cycle issue
+   - **unapproved** label removed, **approved** label added
 
 ### Exit Criteria
 - `/approved` comment on master cycle issue
@@ -255,9 +243,9 @@ Approved cycle ready for execution:
 
 ## Phase 6: Stream Leadership
 
-**Responsible:** Stream Leader Agent  
-**Purpose:** Trigger work on available issues and monitor progress  
-**Agent Reference:** [Stream Leader Agent](../stream-leader/README.md)
+**Responsible:** Stream Leader Agent & Owner  
+**Purpose:** Trigger work on available issues and merge changes
+**Agent Reference:** `stream-leader/README.md`
 
 ### Entry Criteria
 - Cycle with **approved** label
@@ -265,32 +253,7 @@ Approved cycle ready for execution:
 
 ### Work Performed
 
-The stream leader runs periodically (typically every 10 minutes during business hours 9am-5pm):
-
-#### 1. Find Active Streams
-Query for open issues labeled `stream` AND `approved`
-
-#### 2. Validate Parent Approval
-Skip streams whose parent cycle issue lacks the `approved` label
-
-#### 3. Identify Available Work
-An issue is **available** if:
-- It is the **first issue** in the stream; OR
-- The issue **before it** is complete (closed)
-
-#### 4. Trigger Work
-For each available open sub-issue:
-1. Check if `/ocjr work on this issue` comment exists
-2. If comment exists:
-   - Check for related PR cross-reference activity
-   - If no PR and cooldown elapsed, re-post comment as reminder
-3. If comment doesn't exist:
-   - Post `/ocjr work on this issue` comment
-
-#### 5. Close Completed Streams
-When a stream has no open sub-issues remaining:
-- Close the stream issue
-- Mark stream as complete
+The stream leader triggers work to start on work issues. The owner reviews PRs and merges changes.
 
 ### Exit Criteria
 - All sub-issues in all streams are complete (closed)
@@ -301,11 +264,6 @@ When a stream has no open sub-issues remaining:
 Completed work items with:
 - All work issues closed
 - All stream issues closed
-- History of triggered work via `/ocjr work on this issue` comments
-
-### Configuration
-- **Reminder Cooldown:** `STREAM_LEADER_REMINDER_COOLDOWN_MINUTES` (default: 20 minutes)
-- **Schedule:** Runs every 10 minutes during business hours (9am-5pm)
 
 ---
 
@@ -369,7 +327,7 @@ Phase 5: Cycle Approval
 │ + linked hierarchy          │
 └─────────────────────────────┘
     │
-    ▼ Stream Leader Agent
+    ▼ Stream Leader Agent & Owner
 Phase 6: Stream Leadership
     │
     ▼
@@ -384,13 +342,13 @@ Phase 6: Stream Leadership
 |-------|-------|---------|----------|
 | **Issue Refiner** | Phase 2 | Structure raw issues with templates | `.opencode/agent/issue-refiner.md` |
 | **Cycle Planner** | Phase 4 | Organize approved issues into cycles | `.opencode/agent/cycle-planner.md` |
-| **Stream Leader** | Phase 6 | Trigger and monitor work execution | `stream-leader/README.md` |
+| **Stream Leader** | Phase 6 | Trigger work execution | `stream-leader/README.md` |
 
 ---
 
 ## `/approved` Comment Workflow
 
-The `/approved` comment is the Owner's signal that a phase is complete and the next phase can begin:
+The `/approved` comment is the Owner's signal that that the issue is ready to be included in the next phase:
 
 1. **Phase 3** - Owner comments `/approved` on refined issues
    - Removes `unapproved` label
@@ -410,19 +368,6 @@ The comment serves as both documentation of approval and trigger for automated l
 
 The workflow leverages the `gh-sub-issue` GitHub CLI extension for managing hierarchical relationships:
 
-### Sub-Issue Commands
-
-```bash
-# Link an issue as a sub-issue
-gh sub-issue add <parent-issue-number> <issue-number>
-
-# List sub-issues of a parent
-gh sub-issue list <parent-issue-number>
-
-# Remove a sub-issue link
-gh sub-issue remove <parent-issue-number> <issue-number>
-```
-
 ### Hierarchy Structure
 
 ```
@@ -438,7 +383,7 @@ Cycle Issue (master)
     └── Work Issue F
 ```
 
-For detailed command reference, see [gh-sub-issue Skill](../.opencode/skills/gh-sub-issue/SKILL.md).
+For detailed command reference, see `.opencode/skills/gh-sub-issue/SKILL.md`.
 
 ---
 
@@ -451,7 +396,7 @@ For detailed command reference, see [gh-sub-issue Skill](../.opencode/skills/gh-
 | 3 | Issue Approval | Owner | refined + unapproved | approved | Approved work item |
 | 4 | Cycle Planning | Cycle Planner Agent | approved | cycle/stream + unapproved + hierarchy | Organized cycle with streams |
 | 5 | Cycle Approval | Owner | unapproved cycle/streams | approved on all | Approved cycle ready for execution |
-| 6 | Stream Leadership | Stream Leader Agent | approved cycle | All issues complete | Completed work |
+| 6 | Stream Leadership | Stream Leader Agent & Owner | approved cycle | All issues complete | Completed work |
 
 ---
 
@@ -460,15 +405,15 @@ For detailed command reference, see [gh-sub-issue Skill](../.opencode/skills/gh-
 ### Issue States at a Glance
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ Raw Idea                                                    │
-│   └─▶ [Owner creates] P0 + unrefined                        │
-│       └─▶ [Agent refines] P0 + refined + unapproved         │
-│           └─▶ [Owner approves] P0 + approved                │
-│               └─▶ [Agent plans] cycle + unapproved          │
-│                   └─▶ [Owner approves] cycle + approved     │
-│                       └─▶ [Agent executes] COMPLETE         │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│ Raw Idea                                                     │
+│   └─▶ [Owner creates] P0 + unrefined                         │
+│       └─▶ [Agent refines] P0 + refined + unapproved          │
+│           └─▶ [Owner approves] P0 + approved                 │
+│               └─▶ [Agent plans] cycle + unapproved           │
+│                   └─▶ [Owner approves] cycle + approved      │
+│                       └─▶ [Agent & Owner execute] COMPLETE   │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ### Required Owner Actions
@@ -476,9 +421,10 @@ For detailed command reference, see [gh-sub-issue Skill](../.opencode/skills/gh-
 1. **Phase 1**: Create issues with P0 + unrefined labels
 2. **Phase 3**: Review and comment `/approved` on refined issues
 3. **Phase 5**: Review cycle, comment `/approved` on cycle AND each stream
+4. **Phase 6**: Review PRs and merge changes
 
 ### Automated Agent Actions
 
 1. **Phase 2**: Issue Refiner processes unrefined → refined
 2. **Phase 4**: Cycle Planner creates cycle + stream structure
-3. **Phase 6**: Stream Leader triggers work and monitors progress
+3. **Phase 6**: Stream Leader triggers work
