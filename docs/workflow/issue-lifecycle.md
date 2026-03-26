@@ -39,7 +39,7 @@ The workflow consists of **6 phases** designed to transform raw ideas and bug re
 1. Create a new GitHub issue describing the bug or enhancement
 2. Provide initial description of the problem or feature
 3. Include any screenshots, recordings, or supporting context
-4. Assign **P0** label to indicate priority
+4. Assign **P0|P1|P2|PX** label to indicate priority
 5. Assign **unrefined** label to signal the issue needs processing
 
 ### Exit Criteria
@@ -50,7 +50,7 @@ The workflow consists of **6 phases** designed to transform raw ideas and bug re
 ### Output
 A raw issue with:
 - Basic title and description
-- **P0** priority label
+- **P0|P1|P2|PX** priority label
 - **unrefined** status label
 
 ---
@@ -59,7 +59,7 @@ A raw issue with:
 
 **Responsible:** Issue Refiner Agent  
 **Purpose:** Structure and clarify raw issues into actionable work items  
-**Agent Reference:** [Issue Refiner Agent](../.opencode/agent/issue-refiner.md)
+**Agent Reference:** (`.opencode/agent/issue-refiner.md`)
 
 ### Entry Criteria
 - Issue has **P0** + **unrefined** labels
